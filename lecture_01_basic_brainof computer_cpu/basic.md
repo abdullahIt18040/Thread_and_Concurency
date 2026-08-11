@@ -2,3 +2,7 @@
 
 
 process হলো একটি চলমান Program, Thread হলো সেই Program-এর কাজ করার পথ (execution path), আর CPU সরাসরি Thread-এর instructions execute করে। Operating System-এর Scheduler ঠিক করে কোন Thread কখন CPU পাবে।
+
+```
+CPU Memory থেকে instruction Fetch করে, instruction Decode করে বুঝে, তারপর Execute করে। এরপর পরবর্তী instruction-এর জন্য একই cycle repeat করে।
+```
