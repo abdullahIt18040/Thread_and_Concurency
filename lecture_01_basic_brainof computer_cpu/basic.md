@@ -14,7 +14,7 @@ CPU (Central Processing Unit)
 - A CPU can have multiple cores.
 
 Example:
-
+```
 CPU
 ├── Core 1 → Executes instructions
 ├── Core 2 → Executes instructions
@@ -22,3 +22,29 @@ CPU
 ├── Core 4 → Executes instructions
 ├── Cache
 └── Memory Controller
+Single-Core vs Multi-Core Processor
+Single-Core Processor
+
+A single-core processor has only one CPU core to execute instructions.
+
+CPU
+└── Core 1
+    └── Executes instructions
+One physical core
+Executes one instruction stream at a time
+Limited multitasking performance
+Older processors commonly used this design
+Multi-Core Processor
+
+A multi-core processor contains multiple CPU cores inside one CPU.
+
+CPU
+├── Core 1 → Executes instructions
+├── Core 2 → Executes instructions
+├── Core 3 → Executes instructions
+└── Core 4 → Executes instructions
+Multiple physical cores
+Cores can execute instructions concurrently
+Better multitasking and parallel processing
+Modern CPUs commonly have multiple cores
+```
