@@ -48,3 +48,56 @@ Cores can execute instructions concurrently
 Better multitasking and parallel processing
 Modern CPUs commonly have multiple cores
 ```
+### CPU-Bound vs I/O-Bound Tasks
+```
+1. CPU-Bound Task
+
+যে task-এ মূল কাজ CPU-এর calculation/processing, তাকে CPU-bound task বলে।
+
+Examples:
+
+Mathematical calculation
+Sorting
+Image processing
+Encryption
+Complex algorithms
+Thread → CPU Core → Calculation
+
+Key Point: CPU-bound task-এ bottleneck হলো CPU।
+তাই বেশি Thread সবসময় performance বাড়ায় না।
+
+2. I/O-Bound Task
+
+যে task-এ Thread-কে Input/Output operation-এর জন্য অপেক্ষা করতে হয়, তাকে I/O-bound task বলে।
+
+Examples:
+
+Database query
+File read/write
+HTTP/API call
+Network operation
+Kafka message
+Thread
+  ↓
+I/O Request
+  ↓
+WAITING ⏳
+  ↓
+Response
+  ↓
+Processing
+
+Key Point: I/O-bound task-এ bottleneck হলো I/O waiting।
+
+3. Thread & Concurrency
+CPU-Bound:
+Thread → CPU → Calculation
+
+
+I/O-Bound:
+Thread → I/O → WAITING → Response
+
+Concurrency: একাধিক task-এর progress একসাথে manage করা।
+
+Parallelism: একাধিক CPU core-এ একাধিক task একই সময়ে execute করা।
+```
