@@ -182,3 +182,151 @@ Physical Core 1
        ↓
 2 Logical CPUs
 ```
+### CPU Cache and it level
+```
+CPU Cache হলো CPU- core এর খুব দ্রুত ছোট memory, যেখানে frequently used data ও instructions সাময়িকভাবে রাখা হয়।
+
+CPU Core
+   ↓
+L1 Cache
+   ↓
+L2 Cache
+   ↓
+L3 Cache (data একাধিক Core-এর মধ্যে shared kore )
+   ↓
+RAM
+Cache Levels
+Level	Speed	Size	সাধারণ বৈশিষ্ট্য
+L1	Fastest	Small	Core-এর সবচেয়ে কাছে
+L2	Fast	Medium	L1-এর চেয়ে বড়
+L3	Slower	Large	অনেক CPU-তে multiple core-এর মধ্যে shared
+আপনার CPU
+L1 = 256 KB
+L2 = 1 MB
+L3 = 6 MB
+Cache Hit vs Miss
+Cache Hit:
+CPU → Cache → Data ✓
+
+
+Cache Miss:
+CPU → L1 → L2 → L3 → RAM
+
+মনে রাখুন:
+
+L1 = ছোট + সবচেয়ে দ্রুত
+L2 = মাঝারি
+L3 = বড় + তুলনামূলক ধীর
+```
+### Process and Thread
+1. Process(Memeory Share kore na) 
+
+Process হলো একটি running program।
+
+যখন কোনো program ,Applicationn চালু করি, Operating System সেটিকে একটি process হিসেবে চালায়।
+
+Examples:
+
+Chrome       → Process
+IntelliJ     → Process
+Java App     → Process
+Process Memory
+
+প্রতিটি process সাধারণত নিজের   Own Memory space পায়।
+
+Process-1              Process-2
+┌────────────┐         ┌────────────┐
+│ Code       │         │ Code       │
+│ Data       │         │ Data       │
+│ Heap       │         │ Heap       │
+│ Stack      │         │ Stack      │
+└────────────┘         └────────────┘
+   Own Memory             Own Memory
+
+এক Process সাধারণত অন্য Process-এর memory সরাসরি access করতে পারে না।
+
+এটাকে Process Isolation বলা হয়।
+
+2. Thread (memory share kore)
+
+Thread হলো Process-এর ভিতরের execution path।
+
+একটি Process-এর মধ্যে এক বা একাধিক Thread থাকতে পারে।
+
+Process
+│
+├── Thread-1
+├── Thread-2
+└── Thread-3
+
+Java example:
+
+Java Application
+       ↓
+     Process
+       │
+       ├── Main Thread
+       ├── Worker Thread
+       └── Async Thread
+3. Thread Memory
+
+একই Process-এর Thread-গুলো সাধারণত কিছু memory share করে:
+
+Process
+│
+├── Shared Code
+├── Shared Heap
+├── Shared Data
+│
+├── Thread-1 → Own Stack
+├── Thread-2 → Own Stack
+└── Thread-3 → Own Stack
+Shared
+Heap
+Code
+Global/Static Data
+Per Thread
+Stack
+Program Counter
+Registers / execution state
+``
+### Concurrency vs Parallelism
+``
+2 ta program er 2 instruction same time 2 ta core e execute hoi , tokhon eta Parallelism , 2 ta program er 2 instruction 1 core e one by one execute hoi tohon take Concurrency.
+Parallelism
+
+যখন একাধিক task/thread একই সময়ে একাধিক CPU core-এ সত্যিকারভাবে execute হয়, তখন তাকে Parallelism বলে।
+
+Example:
+
+2 Tasks + 2 CPU Cores
+
+
+Core 1 → Instruction 1
+Core 2 → Instruction 2
+
+দুইটি instruction একই সময়ে execute হচ্ছে।
+
+Parallelism = Multiple tasks execute simultaneously.
+
+Concurrency
+
+যখন একাধিক task/thread একই সময়ে active/progress করছে, কিন্তু একটি core-এ CPU তাদের একটির পর একটি execute করে এবং প্রয়োজনে context switching করে, তখন তাকে Concurrency বলে।
+
+Example:
+
+1 CPU Core
+
+
+Instruction 1
+     ↓
+Context Switch
+     ↓
+Instruction 2
+     ↓
+Context Switch
+     ↓
+Instruction 1
+
+Concurrency = Multiple tasks-এর overlapping progress.
+``
