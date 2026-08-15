@@ -291,7 +291,7 @@ Program Counter
 Registers / execution state
 ``
 ### Concurrency vs Parallelism
-``
+```
 2 ta program er 2 instruction same time 2 ta core e execute hoi , tokhon eta Parallelism , 2 ta program er 2 instruction 1 core e one by one execute hoi tohon take Concurrency.
 Parallelism
 
@@ -329,4 +329,5 @@ Context Switch
 Instruction 1
 
 Concurrency = Multiple tasks-এর overlapping progress.
-``
+সাধারণ application-এ Concurrency খুব common,
+```
