@@ -101,3 +101,84 @@ Concurrency: একাধিক task-এর progress একসাথে manage �
 
 Parallelism: একাধিক CPU core-এ একাধিক task একই সময়ে execute করা।
 ```
+### 1 Core and 2 Thread মানে 1টি physical core এবং 2টি logical processor;
+```
+1. Basic Concept
+
+একটি CPU Core-এর সাথে Physical Core, Hardware Thread, এবং Logical CPU concept জড়িত।
+
+যদি একটি CPU-তে:
+
+1 Physical Core
+2 Hardware Threads
+
+থাকে, তাহলে Operating System সাধারণত সেটিকে:
+
+2 Logical CPUs / Logical Processors
+
+হিসেবে দেখতে পারে।
+
+2. 1 Core / 2 Thread
+CPU
+└── Physical Core 1
+      ├── Hardware Thread 1
+      └── Hardware Thread 2
+
+OS-এর কাছে:
+
+CPU
+├── Logical CPU 1
+└── Logical CPU 2
+
+অর্থাৎ:
+
+Physical Core = 1
+Hardware Threads = 2
+Logical CPUs = 2
+3. Physical Core
+
+Physical Core হলো CPU-এর আসল hardware processing core।
+
+CPU
+└── Core 1
+
+একটি CPU-তে একাধিক physical core থাকতে পারে:
+
+CPU
+├── Core 1
+├── Core 2
+├── Core 3
+└── Core 4
+
+এগুলো হলো 4 Physical Cores।
+
+4. Hardware Thread
+
+SMT (Simultaneous Multithreading) বা Intel-এর ক্ষেত্রে Hyper-Threading ব্যবহার করলে একটি physical core একাধিক hardware execution context support করতে পারে।
+
+Physical Core 1
+      │
+      ├── Hardware Thread 1
+      └── Hardware Thread 2
+
+এখানে দুইটি hardware thread একই physical core-এর অনেক hardware resources share করে।
+
+Hardware thread ≠ Physical core
+
+5. Logical CPU / Logical Processor
+
+Operating System hardware threads-কে সাধারণত Logical CPUs হিসেবে দেখে।
+
+Physical Core 1
+      │
+      ├── Logical CPU 1
+      └── Logical CPU 2
+
+তাই:
+
+1 Physical Core
+       ↓
+2 Hardware Threads
+       ↓
+2 Logical CPUs
+```
