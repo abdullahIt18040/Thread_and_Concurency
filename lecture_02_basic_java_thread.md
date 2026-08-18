@@ -1,5 +1,5 @@
 ## Basic concept of java thread
-
+## start() না call করলে নতুন Thread execution শুরু হয় না.
 
 <img width="628" height="313" alt="image" src="https://github.com/user-attachments/assets/04275b66-6f51-428b-8639-91d973ccfdf3" />
 
@@ -498,4 +498,52 @@ public class Main {
         System.out.println("end executed by "+Thread.currentThread().getName());
     }
 }
+```
+### Runnable Interface in Java
+
+Runnable হলো Java-এর একটি functional interface, যা বলে একটি Thread কোন কাজটি execute করবে।
+```
+সহজভাবে:
+
+Runnable = Thread-এর কাজ/task define করার interface।
+
+Example
+class MyTask implements Runnable {
+
+
+    @Override
+    public void run() {
+        System.out.println("Task is running");
+    }
+}
+
+এখানে run()-এর ভিতরে Thread-এর কাজ লেখা হয়েছে।
+
+তারপর:
+
+public class Main {
+    public static void main(String[] args) {
+
+
+        MyTask task = new MyTask();
+
+
+        Thread thread = new Thread(task);
+
+
+        thread.start();
+    }
+}
+Flow
+MyTask
+  ↓
+implements Runnable
+  ↓
+run() → Task
+  ↓
+Thread(task)
+  ↓
+start()
+  ↓
+New Thread executes run()
 ```
