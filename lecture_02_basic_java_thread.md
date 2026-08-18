@@ -128,7 +128,7 @@ public class Main {
 }
 ```
 ## Runnable vs Callable
-
+```
 Java concurrency-তে Runnable এবং Callable দুটোই funtional interface and task define করার জন্য ব্যবহার হয়। তবে প্রধান পার্থক্য হলো return value এবং exception handling।
 
 1. Runnable
@@ -191,9 +191,9 @@ executor.shutdown();
 Output:
 
 30
-``
+```
 ### ThreadGroup,RunableInterface
-``
+```
 ThreadGroup group = new ThreadGroup("Workers");
 
 
@@ -280,4 +280,4 @@ main ThreadGroup
 Thread-এরও একটি ThreadGroup থাকে।
 নতুন Thread সাধারণত creator Thread-এর ThreadGroup inherit করে।
 ThreadGroup-এরও parent ThreadGroup থাকতে পারে।
-``
+```
