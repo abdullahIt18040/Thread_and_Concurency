@@ -470,12 +470,29 @@ Method শেষ → Frame remove/pop
 ```
 ## how to thread create and work another path
 ```
+approach one to create thread: used Runnable 
+
 class Task implements Runnable{
     @Override
     public void run() {
         for(int i=0;i<10;i++)
         {
             System.out.println(i+" executed by "+Thread.currentThread().getName());
+        }
+    }
+}
+approach TWO to create thread: used extends Thread
+class Task2 extends Thread{
+    
+    public Task2() {
+        super("Sdlc pro 2");
+    }
+
+    @Override
+    public void run() {
+        for(int i=0;i<10;i++)
+        {
+            System.out.println(i+" Task 2 executed by "+Thread.currentThread().getName());
         }
     }
 }
@@ -489,7 +506,8 @@ public class Main {
         // create new path to execute task
         Thread thread = new Thread(target); // different thread executed
         thread.start();// different thread executed  start here
-
+     Task2  task2 = new Task2();
+     task2.start();
         //main thread executed
         for(int i=0;i<10;i++)
         {
