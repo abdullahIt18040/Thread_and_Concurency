@@ -83,3 +83,47 @@ Process
 ├── Thread-2
 └── Thread-3
 ```
+### run() Method কী?
+```
+Java-তে run() method-এর ভিতরে Thread যে কাজটি করবে সেই task-এর code লেখা হয়।
+
+সহজভাবে:
+
+run() = Thread-এর কাজ
+
+Simple Example
+class MyTask implements Runnable {
+
+
+    @Override
+    public void run() {
+        System.out.println("Task is running");
+    }
+}
+
+এখানে:
+
+Runnable
+   ↓
+run()
+   ↓
+"Task is running"
+
+তারপর Thread তৈরি করি:
+
+public class Main {
+
+
+    public static void main(String[] args) {
+
+
+        MyTask task = new MyTask();
+
+
+        Thread thread = new Thread(task);
+
+
+        thread.start();
+    }
+}
+```
