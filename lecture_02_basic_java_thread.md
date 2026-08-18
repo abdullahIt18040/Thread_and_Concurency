@@ -234,14 +234,86 @@ Thread → কাজটি execute করবে
 
 সাধারণভাবে:
 ``
+আপনার output-টা আসলে JVM-এর ThreadGroup hierarchy দেখাচ্ছে। একদম সহজভাবে ভেঙে দেখি।
+
+1. পুরো Structure
+
+আপনার output:
+
 system ThreadGroup
-       │
-       └── main ThreadGroup
-              │
-              ├── main Thread
-              ├── Thread-1
-              └── Thread-2
-আপনার main thread
+│
+├── Reference Handler
+├── Finalizer
+├── Signal Dispatcher
+├── Attach Listener
+├── Notification Thread
+│
+├── main ThreadGroup
+│   ├── main
+│   └── Monitor Ctrl-Break
+│
+└── InnocuousThreadGroup
+    └── Common-Cleaner
+
+অর্থাৎ সব Thread একই ThreadGroup-এর মধ্যে নেই।
+
+2. system ThreadGroup
+java.lang.ThreadGroup[name=system,maxpri=10]
+
+এটা JVM-এর একটি top-level ThreadGroup।
+
+এর মধ্যে JVM-এর কিছু internal/system thread আছে।
+
+যেমন:
+
+Reference Handler
+Finalizer
+Signal Dispatcher
+Attach Listener
+Notification Thread
+
+এগুলো আপনার application-এর business logic-এর thread নয়; JVM/runtime-এর বিভিন্ন internal কাজের জন্য ব্যবহৃত হয়।
+
+3. main ThreadGroup
+java.lang.ThreadGroup[name=main,maxpri=10]
+
+এর মধ্যে:
+
+Thread[main,5,main]
+Thread[Monitor Ctrl-Break,5,main]
+Thread[main,5,main]
+
+এটাই আপনার Java program-এর main thread।
+
+Format:
+
+Thread[name, priority, group]
+
+তাই:
+
+Thread[main,5,main]
+
+মানে:
+
+Name     = main
+Priority = 5
+Group    = main
+4. Monitor Ctrl-Break
+Thread[Monitor Ctrl-Break,5,main]
+
+এটা আপনার IDE/JVM environment-এর একটি monitoring-related thread হতে পারে।
+
+এটাও main ThreadGroup-এর মধ্যে আছে।
+
+5. InnocuousThreadGroup
+java.lang.ThreadGroup[name=InnocuousThreadGroup,maxpri=10]
+
+এর মধ্যে:
+
+Thread[Common-Cleaner,8,InnocuousThreadGroup]
+
+Common-Cleaner হলো JVM-এর cleanup-related background thread।
+
 
 Java application শুরু হলে সাধারণত main thread থাকে:
 
@@ -280,4 +352,49 @@ main ThreadGroup
 Thread-এরও একটি ThreadGroup থাকে।
 নতুন Thread সাধারণত creator Thread-এর ThreadGroup inherit করে।
 ThreadGroup-এরও parent ThreadGroup থাকতে পারে।
+```
+### Thread Stack Memory
+```
+প্রতিটি Thread-এর জন্য JVM আলাদা Stack Memory তৈরি করে।
+
+এই Stack-এ Thread-এর:
+
+Method call
+Local variables
+Method parameters
+Execution information
+
+রাখা হয়।
+
+Process
+│
+├── Heap (Shared)
+│
+├── Thread-1
+│    └── Stack (Own)
+│
+├── Thread-2
+│    └── Stack (Own)
+│
+└── Thread-3
+     └── Stack (Own)
+গুরুত্বপূর্ণ
+
+Heap → একই Process-এর Thread-গুলো share করে
+Stack → প্রতিটি Thread-এর নিজের আলাদা থাকে
+
+প্রতিটি method call-এর সময় Stack-এ একটি Stack Frame তৈরি হয়।
+
+Thread-1 Stack
+┌──────────────┐
+│ methodB()    │
+├──────────────┤
+│ methodA()    │
+├──────────────┤
+│ main()       │
+└──────────────┘
+
+Short Note:
+
+JVM creates a separate stack for each thread, which stores method calls, local variables, parameters, and execution state.
 ```
