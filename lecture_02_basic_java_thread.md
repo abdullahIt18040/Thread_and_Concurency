@@ -397,4 +397,105 @@ Thread-1 Stack
 Short Note:
 
 JVM creates a separate stack for each thread, which stores method calls, local variables, parameters, and execution state.
+
+
+Stack Frame-এর মধ্যে কী থাকে?
+
+সাধারণভাবে একটি Stack Frame-এ থাকে:
+
+Stack Frame
+┌──────────────────────┐
+│ Local Variables      │
+│ Method Parameters    │
+│ Return Information   │
+│ Operand Stack        │
+│ Reference to runtime │
+└──────────────────────┘
+Example
+public static void main(String[] args) {
+    int a = 10;
+    int b = 20;
+
+
+    int result = sum(a, b);
+}
+
+
+static int sum(int x, int y) {
+    int total = x + y;
+    return total;
+}
+
+যখন main() শুরু হয়:
+
+Thread Stack
+┌─────────────────┐
+│ main() Frame    │
+│ a = 10          │
+│ b = 20           │
+└─────────────────┘
+
+তারপর:
+
+sum(a, b);
+
+call হলে নতুন Frame তৈরি হয়:
+
+Thread Stack
+┌─────────────────┐
+│ sum() Frame     │
+│ x = 10          │
+│ y = 20          │
+│ total = 30      │
+├─────────────────┤
+│ main() Frame    │
+│ a = 10          │
+│ b = 20          │
+└─────────────────┘
+
+sum() শেষ হলে তার Frame Stack থেকে remove/pop হয়ে যায়:
+
+Thread Stack
+┌─────────────────┐
+│ main() Frame    │
+│ a = 10          │
+│ b = 20          │
+│ result = 30     │
+└─────────────────┘
+সহজভাবে মনে রাখুন
+
+Method call → Stack Frame তৈরি
+Method-এর local data → Frame-এ থাকে
+Method শেষ → Frame remove/pop
+```
+## how to thread create and work another path
+```
+class Task implements Runnable{
+    @Override
+    public void run() {
+        for(int i=0;i<10;i++)
+        {
+            System.out.println(i+" executed by "+Thread.currentThread().getName());
+        }
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+   //main thread executed
+        System.out.println(" start executed by "+Thread.currentThread().getName());
+
+//        task
+        Runnable target = new Task();
+        // create new path to execute task
+        Thread thread = new Thread(target); // different thread executed
+        thread.start();// different thread executed  start here
+
+        //main thread executed
+        for(int i=0;i<10;i++)
+        {
+            System.out.println(i+" executed by "+Thread.currentThread().getName());
+        }
+        System.out.println("end executed by "+Thread.currentThread().getName());
+    }
+}
 ```
