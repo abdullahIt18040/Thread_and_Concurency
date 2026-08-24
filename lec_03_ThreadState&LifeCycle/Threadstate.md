@@ -255,3 +255,106 @@ Thread Dump
 
 Main purpose: Java application-এর Thread behavior, state, stack trace, blocking এবং deadlock debug করা।
 ```
+## Inter-Thread Communication কী?
+```
+
+Inter-Thread Communication হলো—একটি thread অন্য thread-এর সাথে data/state নিয়ে communicate বা coordinate করা।
+
+Java-তে এটি সাধারণত ব্যবহার হয় যখন একটি thread কোনো কাজের জন্য অপেক্ষা করবে এবং অন্য thread কাজ শেষ করে তাকে signal করবে।
+
+সবচেয়ে common example হলো Producer–Consumer problem।
+
+Example
+
+ধরো একটি Queue আছে:
+
+Producer Thread
+      |
+      | Employee add করে
+      ↓
++-------------------+
+| Employee Queue    |
+| A | B | C         |
++-------------------+
+      |
+      | Employee নেয়
+      ↓
+Consumer Thread
+
+এখানে:
+
+Producer Thread → Queue-তে Employee রাখে
+Consumer Thread → Queue থেকে Employee নেয়
+Queue empty হলে Consumer অপেক্ষা করবে
+Producer Employee add করলে Consumer-কে জানাবে
+
+এটাই inter-thread communication-এর একটি classic use case।
+
+Java-তে কীভাবে করা হয়?
+
+পুরোনো/মূল Java mechanism:
+
+wait()
+notify()
+notifyAll()
+
+এগুলো Object class-এর method।
+
+Example:
+
+synchronized (queue) {
+
+    while (queue.isEmpty()) {
+        queue.wait();
+    }
+
+    Employee employee = queue.poll();
+}
+
+অন্য thread:
+
+synchronized (queue) {
+
+    queue.add(employee);
+
+    queue.notify();
+}
+
+Flow:
+
+Consumer Thread
+      |
+      | queue empty
+      ↓
+   wait()
+      |
+      | WAITING
+      |
+      |        Producer Thread
+      |              |
+      |              | queue.add()
+      |              ↓
+      |           notify()
+      |              |
+      ↓              |
+Consumer wakes ←─────
+      |
+      ↓
+queue.poll()
+কেন wait()?
+
+Consumer-এর কাছে কাজ নেই। তাই CPU continuously ব্যবহার না করে:
+
+while (queue.isEmpty()) {
+    queue.wait();
+}
+
+এখানে thread wait state-এ চলে যায়।
+
+Producer যখন data দেয়:
+
+queue.add(employee);
+queue.notify();
+
+তখন waiting thread-কে wake-up করার signal দেয়।
+```
