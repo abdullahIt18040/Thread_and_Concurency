@@ -31,3 +31,25 @@ Java Thread → Native/JVM → OS Thread → OS Scheduler → Logical Processor 
  3.ei thread jonnno memory allocate kore.
  4.ei thread ke runable state niye jai
 ```
+## start() vs run() in Java Thread
+```
+start() → নতুন Thread শুরু করে → run() execute করে
+
+run() → শুধু task-এর code execute করে; নিজে নতুন Thread তৈরি করে না।
+
+start()
+  ↓
+New Thread
+  ↓
+run()
+  ↓
+Task Execute
+
+কিন্তু:
+
+run()
+  ↓
+Current Thread
+  ↓
+Task Execute
+```
