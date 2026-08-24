@@ -53,3 +53,7 @@ Current Thread
   ↓
 Task Execute
 ```
+## What Happens When start() Is Called? 
+```
+start() → start0() → JVM/Native Layer-এর মাধ্যমে OS-level thread execution শুরু হয় → Thread Runnable State-এ যায় → OS Scheduler CPU-তে schedule করে → run() method execute হয়।
+```
