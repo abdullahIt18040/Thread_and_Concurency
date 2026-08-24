@@ -24,3 +24,10 @@ Result → application-এর thread execution-এর মাধ্যমে প�
 
 Java Thread → Native/JVM → OS Thread → OS Scheduler → Logical Processor → CPU Core → Execute
 ```
+## private native void start0() ki ki kore ;
+```
+1.os ke bole ekta thread lagbe.os ekta thread creat kore
+2.application thread sate os thread map or assign kore
+ 3.ei thread jonnno memory allocate kore.
+ 4.ei thread ke runable state niye jai
+```
