@@ -564,4 +564,8 @@ Thread(task)
 start()
   ↓
 New Thread executes run()
+
+
+Native Method:
+Native method = Java-এর বাইরে implemented method, সাধারণত C/C++ বা JVM/platform-specific native code-এর মাধ্যমে। এর implementation platform/OS অনুযায়ী আলাদা হতে পারে।
 ```
