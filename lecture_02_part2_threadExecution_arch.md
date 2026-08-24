@@ -1,0 +1,26 @@
+## Three Levels of Thread
+```
+1. Application-Level Thread
+Java application-এ আমরা যে Thread তৈরি করি।
+Example: new Thread(task)
+2. OS-Level Thread
+JVM/native layer-এর মাধ্যমে application thread OS thread-এর সাথে mapped হয়।
+OS এই thread-গুলো manage ও schedule করে।
+3. Hardware-Level Thread
+CPU-এর logical processor / hardware execution context।
+OS Scheduler OS thread-কে এখানে schedule করে।
+এরপর CPU core instructions execute করে।
+Overall Flow
+
+Application Thread → JVM/Native → OS Thread → OS Scheduler → Hardware/Logical Processor → CPU Core → Instruction Execute
+```
+## Java Thread → OS Thread Mapping
+```
+Application-level Thread → JVM-এর মাধ্যমে native method/code ব্যবহার করে OS-level thread-এর সাথে যুক্ত হয়।
+Thread.start() → JVM-এর internal/native mechanism-এর মাধ্যমে OS thread শুরু করার ব্যবস্থা করে।
+OS Scheduler → OS-level thread-কে logical processor-এ schedule করে।
+CPU Core → instruction execute করে।
+Result → application-এর thread execution-এর মাধ্যমে পাওয়া যায়।
+
+Java Thread → Native/JVM → OS Thread → OS Scheduler → Logical Processor → CPU Core → Execute
+```
