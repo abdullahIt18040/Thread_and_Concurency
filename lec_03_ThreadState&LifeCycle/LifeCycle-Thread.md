@@ -331,3 +331,68 @@ State → RUNNABLE
 
 মনে রাখবে: yield() মানে “CPU অবশ্যই ছেড়ে দিলাম” নয়, বরং “CPU ছেড়ে দিতে পারি” — scheduler-এর কাছে একটি hint।
 ```
+### can we start the thread twice?
+```
+একই Java Thread object-কে দুইবার start() করা যায় না।
+
+Example
+Thread t = new Thread(() -> {
+    System.out.println("Running");
+});
+
+t.start();   // ✅ প্রথমবার
+t.start();   // ❌ দ্বিতীয়বার
+
+দ্বিতীয়বার start() করলে:
+
+java.lang.IllegalThreadStateException
+
+হবে।
+
+কেন?
+
+একটি Thread-এর lifecycle:
+
+NEW
+ ↓
+start()
+ ↓
+RUNNABLE
+ ↓
+Running
+ ↓
+TERMINATED
+
+একবার start() করার পর Thread আর NEW state-এ থাকে না। তাই একই Thread object-কে আবার start() করা যায় না।
+
+নতুন Thread দিয়ে করা যাবে
+Thread t1 = new Thread(task);
+Thread t2 = new Thread(task);
+
+t1.start();  // ✅
+t2.start();  // ✅
+
+এখানে t1 এবং t2 দুটি আলাদা Thread object।
+
+start() বনাম run()
+t.start();  // নতুন thread তৈরি করে execution শুরু করে
+
+কিন্তু:
+
+t.run();    // শুধু normal method call
+
+run() manually একাধিকবার call করা technically সম্ভব, কিন্তু নতুন thread তৈরি হবে না।
+
+মনে রাখার shortcut
+একই Thread object:
+
+start() → ✅
+start() → ❌ IllegalThreadStateException
+
+নতুন Thread object:
+
+t1.start() → ✅
+t2.start() → ✅
+
+মূল কথা: start() একটি Thread object-এর lifecycle-এ শুধু একবার call করা যায়।
+```
