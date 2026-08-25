@@ -278,3 +278,56 @@ t1 WAITING হবে না।
 
 যে thread join() call করে, সেই thread wait করে।
 ```
+## yield() Method — সহজভাবে
+```
+Thread.yield() হলো একটি static method, যার মাধ্যমে current thread scheduler-কে ইঙ্গিত দেয়:
+
+“আমি এখন CPU ছেড়ে দিতে রাজি; অন্য কোনো runnable thread থাকলে তাকে সুযোগ দিতে পারো।”
+
+Example
+public void run() {
+    for (int i = 0; i < 5; i++) {
+        System.out.println(Thread.currentThread().getName());
+
+        Thread.yield();
+    }
+}
+
+Flow:
+
+Thread-1 → RUNNING
+             |
+          yield()
+             ↓
+      Scheduler-কে hint
+             ↓
+   অন্য RUNNABLE thread
+   CPU পেতে পারে
+গুরুত্বপূর্ণ
+
+yield():
+
+Current thread-কে WAITING বা BLOCKED করে না।
+Thread-এর state সাধারণত RUNNABLE-ই থাকে।
+CPU ছাড়ার guarantee নেই।
+Scheduler চাইলে একই thread-কে আবার immediately CPU দিতে পারে।
+অন্য thread অবশ্যই CPU পাবে—এমন guarantee নেই।
+এটি শুধু scheduler-এর জন্য একটি hint।
+yield() vs sleep()
+yield()	sleep()
+Scheduler-কে hint দেয়	নির্দিষ্ট সময় pause করে
+State সাধারণত RUNNABLE	TIMED_WAITING
+কোনো নির্দিষ্ট সময় নেই	সময় নির্দিষ্ট করা যায়
+CPU ছাড়ার guarantee নেই	specified time পর্যন্ত sleep
+Lock release করে না	Lock release করে না
+Short Note
+yield()
+   ↓
+Current thread scheduler-কে hint দেয়
+   ↓
+"অন্য Runnable thread-কে CPU দিতে পারো"
+   ↓
+State → RUNNABLE
+
+মনে রাখবে: yield() মানে “CPU অবশ্যই ছেড়ে দিলাম” নয়, বরং “CPU ছেড়ে দিতে পারি” — scheduler-এর কাছে একটি hint।
+```
