@@ -396,3 +396,77 @@ t2.start() → ✅
 
 মূল কথা: start() একটি Thread object-এর lifecycle-এ শুধু একবার call করা যায়।
 ```
+### instance method of Thread class 
+```
+Java-এর Thread class-এ অনেক instance method আছে। Instance method মানে হলো Thread object-এর মাধ্যমে call করা method।
+
+Thread t = new Thread();
+t.start();       // instance method
+t.getName();     // instance method
+গুরুত্বপূর্ণ Thread Instance Methods
+Method	কাজ
+start()	Thread execution শুরু করে
+run()	Thread-এর কাজ execute করে
+join()	অন্য thread শেষ হওয়া পর্যন্ত wait করে
+join(ms)	নির্দিষ্ট সময় পর্যন্ত wait করে
+sleep(ms)	⚠️ এটি static, instance method নয়
+interrupt()	Thread-কে interrupt signal দেয়
+isAlive()	Thread এখনো alive কিনা check করে
+getName()	Thread-এর নাম দেয়
+setName()	Thread-এর নাম পরিবর্তন করে
+getPriority()	Thread-এর priority দেখায়
+setPriority()	Thread-এর priority সেট করে
+getState()	Thread-এর current state দেয়
+isInterrupted()	Thread interrupted কিনা check করে
+setDaemon()	Thread-কে daemon thread হিসেবে সেট করে
+isDaemon()	Thread daemon কিনা check করে
+getId()	Thread-এর ID দেয়
+getThreadGroup()	Thread-এর ThreadGroup দেয়
+Example
+Thread t = new Thread();
+
+t.setName("Worker-1");
+t.setPriority(Thread.MAX_PRIORITY);
+
+System.out.println(t.getName());
+System.out.println(t.getPriority());
+System.out.println(t.getState());
+
+t.start();
+
+System.out.println(t.isAlive());
+⚠️ Important: sleep() Instance Method নয়
+
+যদিও তুমি এভাবে লিখতে পারো:
+
+t.sleep(1000);
+
+এটা দেখতে instance method-এর মতো হলেও sleep() আসলে static method।
+
+সঠিকভাবে:
+
+Thread.sleep(1000);
+
+কারণ sleep() current thread-কেই sleep করায়, t-কে নয়।
+
+Shortcut
+Instance methods:
+start()
+run()
+join()
+interrupt()
+isAlive()
+getName()
+setName()
+getState()
+getPriority()
+setPriority()
+isDaemon()
+setDaemon()
+Static methods:
+sleep()
+yield()
+currentThread()
+
+সবচেয়ে গুরুত্বপূর্ণ: Thread class-এর method দেখার সময় আগে বুঝবে method-টি instance নাকি static। sleep(), yield(), currentThread() → static; বাকিগুলোর অনেকগুলো object-এর মাধ্যমে call করা যায়।
+```
