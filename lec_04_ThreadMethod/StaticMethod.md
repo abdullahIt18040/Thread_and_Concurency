@@ -204,3 +204,40 @@ interrupt() = "তুমি যদি wait/sleep করো, তাহলে ত�
 
 আর একটা গুরুত্বপূর্ণ বিষয়: interrupt() thread-কে forcefully stop করে না। Thread কীভাবে interrupt handle করবে, সেটা thread-এর code-এর ওপর নির্ভর করে।
 ```
+my java code 
+```
+import javax.swing.*;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.Callable;
+
+public class Main {
+    static private  int value =0;
+
+    public static void main(String[] args) throws InterruptedException {
+
+
+        Thread t = new Thread(() -> {
+            System.out.println("task start ...........");
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                System.out.println("Interrupted");
+            }
+            System.out.println("vale is "+value);
+
+        });
+      t.start();
+     Thread.sleep(1000);
+
+      value =10;
+
+   t.interrupt();
+
+        System.out.println("terminate task end ..............");
+
+
+
+    }
+}
+```
