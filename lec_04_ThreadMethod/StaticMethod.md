@@ -1,4 +1,5 @@
-## All Static method.
+## All Static method.  Thread priority mustbe with in (1 to 10) 
+
  THREAD MAX_PRIORITY :   
 ```
 Thread.MAX_PRIORITY
@@ -65,4 +66,141 @@ Parent Thread (Priority 8)
 Child Thread (Priority 8)
 
 New Thread-এর initial priority = creating Thread-এর priority।
+```
+##  Thread.sleep() && Thread.interrapte();
+```
+
+sleep() current thread-কে নির্দিষ্ট সময়ের জন্য pause করে।
+
+Thread.sleep(2000);
+
+মানে current thread প্রায় 2 seconds sleep করবে।
+
+Thread state
+RUNNABLE
+   ↓
+Thread.sleep()
+   ↓
+TIMED_WAITING
+   ↓
+সময় শেষ
+   ↓
+RUNNABLE
+
+Example:
+
+public class Main {
+    public static void main(String[] args) throws InterruptedException {
+
+        System.out.println("Start");
+
+        Thread.sleep(2000);
+
+        System.out.println("End");
+    }
+}
+
+Output:
+
+Start
+   ↓
+2 seconds wait
+   ↓
+End
+Important
+
+sleep():
+
+Current thread-কে pause করে
+TIMED_WAITING state-এ যায়
+নির্দিষ্ট সময় পরে আবার runnable হয়
+কোনো lock release করে না
+এটি static method
+Thread.sleep(1000);
+2. Thread.interrupt()
+
+interrupt() অন্য একটি thread-কে interrupt করার request পাঠায়।
+
+thread.interrupt();
+
+এটা সরাসরি thread-কে kill করে না।
+
+Example
+Thread t = new Thread(() -> {
+
+    try {
+        Thread.sleep(10000);
+    } catch (InterruptedException e) {
+        System.out.println("Thread interrupted!");
+    }
+
+});
+
+t.start();
+
+t.interrupt();
+
+এখানে:
+
+Thread t
+   ↓
+sleep(10 seconds)
+   ↓
+TIMED_WAITING
+   ↓
+main → t.interrupt()
+   ↓
+InterruptedException
+   ↓
+catch block
+
+অর্থাৎ sleep() অবস্থায় থাকা thread-কে interrupt করলে তার sleep আগেই শেষ হয়ে যায় এবং InterruptedException হয়।
+
+sleep() + interrupt() একসাথে
+Thread worker = new Thread(() -> {
+
+    try {
+        System.out.println("Sleeping...");
+        Thread.sleep(10000);
+
+    } catch (InterruptedException e) {
+        System.out.println("Interrupted!");
+    }
+});
+
+worker.start();
+
+Thread.sleep(2000);
+
+worker.interrupt();
+
+Flow:
+
+Worker Thread
+     │
+     ├── sleep(10 sec)
+     │
+     │    TIMED_WAITING
+     │
+Main Thread
+     │
+     └── worker.interrupt()
+              ↓
+       InterruptedException
+              ↓
+          catch block
+সবচেয়ে গুরুত্বপূর্ণ পার্থক্য
+sleep()	interrupt()
+Current thread-কে sleep করায়	অন্য thread-কে interrupt request পাঠায়
+TIMED_WAITING state হয়	Thread-এর interrupt status পরিবর্তন করে
+সময় শেষ হলে জেগে ওঠে	sleep()/wait()/join()-এ থাকলে InterruptedException হতে পারে
+Static method	Instance method
+Thread.sleep()	thread.interrupt()
+মনে রাখার shortcut
+
+sleep() = "আমি কিছুক্ষণ অপেক্ষা করছি"
+
+interrupt() = "তুমি যদি wait/sleep করো, তাহলে তোমার অপেক্ষা ভেঙে দাও"
+
+আর একটা গুরুত্বপূর্ণ বিষয়: interrupt() thread-কে forcefully stop করে না। Thread কীভাবে interrupt handle করবে, সেটা thread-এর code-এর ওপর নির্ভর করে।
 ```
