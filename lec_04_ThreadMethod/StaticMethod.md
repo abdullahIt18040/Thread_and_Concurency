@@ -241,4 +241,144 @@ public class Main {
     }
 }
 ```
-30min
+## Thread.currentThread();
+
+```
+
+Thread.currentThread() হলো Java-এর একটি static method, যেটা বর্তমানে যে thread code execute করছে সেই Thread object-টি return করে।
+
+সহজভাবে
+
+Thread.currentThread();
+
+মানে:
+
+"এই মুহূর্তে যে thread কাজ করছে, আমাকে সেই thread-টা দাও।"
+
+Example
+public class Main {
+public class Main {
+    private static int value =0;
+    public static void main(String[] args) throws InterruptedException {
+        Thread t = new Thread(()->{
+            System.out.println("This is a task start ..........");
+            Thread t2 = Thread.currentThread();
+            System.out.println("hash code of curren thread is "+t2.hashCode());
+            try {
+//                Thread.sleep(10000);
+                long count =0;
+                 while (!Thread.interrupted())
+                {
+                   count++;
+                }
+                System.out.println("count "+count);
+            } catch (Exception e) {
+               e.printStackTrace();
+            }
+            System.out.println("resourec / value is "+value);
+            System.out.println("task end ");
+        });
+
+        t.start();
+//        t.sleep(1000);
+        value = 15;
+//        Thread.interrupted();
+   t.interrupt();
+
+
+        System.out.println("Hello, World!");
+    }
+}
+
+Output হতে পারে:
+
+Thread[main,5,main]
+main
+1
+
+এখানে:
+
+Thread t = Thread.currentThread();
+
+main() method বর্তমানে main thread দ্বারা execute হচ্ছে। তাই currentThread() → main thread-এর object return করবে।
+
+```
+### Thread.interrupted(); and t.isInterrupted()
+```
+দুটোই thread-এর interrupt status check করে, কিন্তু সবচেয়ে গুরুত্বপূর্ণ পার্থক্য হলো:
+
+Thread.interrupted() → status check করে এবং status clear করে।
+t.isInterrupted() → status check করে কিন্তু status clear করে না।
+
+1. Thread.interrupted()
+
+এটি static method।
+
+boolean result = Thread.interrupted();
+
+এটি current thread-এর interrupt status check করে।
+
+যদি status true হয়:
+
+true → return করবে
+true → তারপর false করে দেবে
+
+Example:
+
+Thread.currentThread().interrupt();
+
+System.out.println(Thread.interrupted()); // true
+System.out.println(Thread.interrupted()); // false
+
+কারণ প্রথমবার interrupted() status clear করে দিয়েছে।
+
+2. t.isInterrupted()
+
+এটি instance method।
+
+boolean result = t.isInterrupted();
+
+এটি t thread-এর interrupt status check করে, কিন্তু clear করে না।
+
+Thread t = new Thread(() -> {
+    while (true) {
+        if (Thread.currentThread().isInterrupted()) {
+            System.out.println("Interrupted!");
+            break;
+        }
+    }
+});
+
+t.start();
+
+t.interrupt();
+
+System.out.println(t.isInterrupted()); // true
+System.out.println(t.isInterrupted()); // true
+
+দুইবারই true, কারণ isInterrupted() status clear করে না।
+
+মূল পার্থক্য
+Method	Type	কোন Thread check করে?	Interrupt status clear করে?
+Thread.interrupted()	static	Current thread	✅ হ্যাঁ
+t.isInterrupted()	instance	t thread	❌ না
+সহজে মনে রাখুন
+Thread.interrupted()
+        ↓
+"আমি কি interrupted?"
+        ↓
+Current Thread
+        ↓
+Check + Clear
+
+
+t.isInterrupted()
+        ↓
+"t কি interrupted?"
+        ↓
+Thread t
+        ↓
+Check only
+
+একটি গুরুত্বপূর্ণ বিষয়: interrupt() নিজে thread-কে forcefully বন্ধ করে না। এটি সাধারণত thread-এর interrupt flag/status সেট করে, আর thread-কে সেই signal handle করতে হয়।
+```
