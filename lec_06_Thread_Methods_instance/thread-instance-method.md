@@ -134,5 +134,8 @@ join() ব্যবহার করলে calling/current thread অন্য Th
 
 t.start();
 t.join();
+we can set time in melisecoud and nanosecound
+join(3,20) = অন্য Thread শেষ হওয়া পর্যন্ত অপেক্ষা করো, তবে সর্বোচ্চ 3 ms + 20 ns।
+
 
 ```
