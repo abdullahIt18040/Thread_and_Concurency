@@ -140,3 +140,32 @@ GitHub Short Note
 
 Thread Dump হলো running Java application-এর নির্দিষ্ট সময়ের thread-এর snapshot। এতে Thread Name, State এবং Stack Trace দেখা যায়। jstack PID ব্যবহার করে Thread Dump নেওয়া যায়।
 ```
+## JVM Structure
+Thread  create korle jvm stack area te memory allowcate hoi.
+```
+Thread Stack — Short Note
+
+One Thread → One JVM Stack → Multiple Stack Frames
+
+প্রতিটি Thread-এর জন্য আলাদা JVM Stack থাকে।
+Thread যখন কোনো method call করে, তখন Stack-এ একটি Stack Frame তৈরি হয়।
+একটি Thread-এর Stack-এ একাধিক Stack Frame থাকতে পারে।
+Method শেষ হলে তার Stack Frame remove হয়ে যায়।
+Thread
+  ↓
+নিজস্ব JVM Stack
+  ↓
+┌──────────────┐
+│ Frame: main  │
+├──────────────┤
+│ Frame: method1│
+├──────────────┤
+│ Frame: method2│
+└──────────────┘
+
+মনে রাখুন:
+Thread → আলাদা Stack → Method অনুযায়ী Stack Frame
+```
+
+<img width="1140" height="601" alt="image" src="https://github.com/user-attachments/assets/998c0c94-d385-4378-a59e-b22b902e2124" />
+
