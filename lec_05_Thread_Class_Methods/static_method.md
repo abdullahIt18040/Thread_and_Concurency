@@ -387,4 +387,136 @@ Short GitHub Note
 
 Thread.yield() current thread-এর CPU usage সাময়িকভাবে কমানোর জন্য OS Scheduler-কে একটি hint দেয় যাতে অন্য runnable thread CPU পেতে পারে। তবে অন্য thread CPU পাবে—এর কোনো guarantee নেই।
 ```
+### Thread.setDefaultUncaughtExceptionHandler()
+```
+এটি একটি static method, যা application-এর কোনো thread-এর মধ্যে uncaught exception হলে কী করতে হবে—তার জন্য একটি default handler সেট করে।
 
+সহজভাবে:
+
+Thread-এ exception হলো → কেউ catch করল না → Default Uncaught Exception Handler কাজ করবে।
+
+Example
+public class Main {
+
+    public static void main(String[] args) {
+
+        Thread.setDefaultUncaughtExceptionHandler(
+            (thread, exception) -> {
+
+                System.out.println(
+                    "Thread: " + thread.getName()
+                );
+
+                System.out.println(
+                    "Exception: " + exception.getMessage()
+                );
+            }
+        );
+
+        Thread t1 = new Thread(() -> {
+            int result = 10 / 0;
+        }, "Worker-1");
+
+        t1.start();
+    }
+}
+
+Output:
+
+Thread: Worker-1
+Exception: / by zero
+কীভাবে কাজ করে?
+Worker-1
+    ↓
+Exception ঘটে
+    ↓
+try-catch নেই
+    ↓
+Uncaught Exception
+    ↓
+Default UncaughtExceptionHandler
+    ↓
+Handler-এর code execute
+কেন ব্যবহার করি?
+
+Production application-এ সাধারণত:
+
+Exception log করতে
+Thread name জানতে
+Error monitoring করতে
+Unexpected thread failure handle করতে
+Centralized error handling করতে
+
+উদাহরণ:
+
+Thread.setDefaultUncaughtExceptionHandler(
+    (thread, exception) -> {
+        logger.error(
+            "Thread {} failed",
+            thread.getName(),
+            exception
+        );
+    }
+);
+Important
+
+এটি exception catch করে thread-কে চালু রাখে না।
+
+যেমন:
+
+Thread t = new Thread(() -> {
+    throw new RuntimeException("Error");
+});
+
+Exception uncaught হলে handler কাজ করবে, তারপর সাধারণভাবে সেই thread-এর execution শেষ হয়ে যাবে (TERMINATED)।
+
+setUncaughtExceptionHandler() vs setDefaultUncaughtExceptionHandler()
+thread.setUncaughtExceptionHandler(...)
+        ↓
+শুধু নির্দিষ্ট Thread-এর handler
+Thread.setDefaultUncaughtExceptionHandler(...)
+        ↓
+যেসব Thread-এর নিজের handler নেই,
+তাদের জন্য default handler
+Short GitHub Note
+
+Thread.setDefaultUncaughtExceptionHandler() → কোনো Thread-এ uncaught exception হলে defaultভাবে যে handler execute
+```
+### Thread.getDefaultUncaughtExceptionHandler()
+
+```
+
+এটি একটি static method, যা বর্তমানে সেট করা default UncaughtExceptionHandler return করে।
+
+Thread.UncaughtExceptionHandler handler =
+        Thread.getDefaultUncaughtExceptionHandler();
+সহজভাবে
+setDefaultUncaughtExceptionHandler()
+        ↓
+Default Handler সেট করে
+
+getDefaultUncaughtExceptionHandler()
+        ↓
+সেই Default Handler বের করে
+Example
+Thread.setDefaultUncaughtExceptionHandler(
+    (thread, exception) -> {
+        System.out.println("Error: " + exception.getMessage());
+    }
+);
+
+Thread.UncaughtExceptionHandler handler =
+        Thread.getDefaultUncaughtExceptionHandler();
+
+System.out.println(handler);
+Short Note
+
+Thread.getDefaultUncaughtExceptionHandler() → বর্তমানে সেট করা default uncaught exception handler-টি return করে।
+
+Return type:
+
+Thread.UncaughtExceptionHandler
+
+Note: Default handler সেট করা না থাকলে এটি সাধারণত null return করে।
+
+```
