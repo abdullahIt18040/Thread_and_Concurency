@@ -184,4 +184,121 @@ Shortcut:
 
 Stack Frame = একটি method চালানোর জন্য প্রয়োজনীয় local data + temporary data + execution information।
 ```
+### Thread.getAllStackTraces();
+
+```
+
+এটি একটি static method, যা JVM-এর বর্তমানে চলমান/active thread-গুলোর Stack Trace সংগ্রহ করে।
+
+Map<Thread, StackTraceElement[]> all =
+        Thread.getAllStackTraces();
+সহজভাবে
+
+getAllStackTraces() → সব active thread-এর Stack Trace একসাথে দেয়।
+
+Flow:
+
+Thread.getAllStackTraces()
+          ↓
+   All Active Threads
+          ↓
+ ┌────────┬────────┬────────┐
+ │ main   │ T1     │ T2     │
+ └────────┴────────┴────────┘
+    ↓        ↓        ↓
+ Stack     Stack    Stack
+ Trace     Trace    Trace
+Example
+public class Main {
+    public static void main(String[] args) {
+
+        Thread t1 = new Thread(() -> {
+            while (true) {
+                // doing work
+            }
+        }, "Worker-1");
+
+        t1.start();
+
+        Map<Thread, StackTraceElement[]> threads =
+                Thread.getAllStackTraces();
+
+        for (Map.Entry<Thread, StackTraceElement[]> entry
+                : threads.entrySet()) {
+
+            Thread thread = entry.getKey();
+
+            System.out.println(
+                    "Thread: " + thread.getName()
+                    + " | State: " + thread.getState()
+            );
+
+            for (StackTraceElement element : entry.getValue()) {
+                System.out.println("    " + element);
+            }
+        }
+    }
+}
+
+Output-এর মতো:
+
+Thread: main | State: RUNNABLE
+    Main.main(Main.java:15)
+
+Thread: Worker-1 | State: RUNNABLE
+    Main.lambda$main$0(Main.java:7)
+Return কী করে?
+Map<Thread, StackTraceElement[]>
+
+এখানে:
+
+StackTraceElement = একটি Stack Frame-এর information।
+
+Thread
+   ↓
+StackTraceElement[]
+   ↓
+StackTraceElement = একটি Stack Frame-এর information।
+যেমন একটি thread-এর stack:
+
+Worker-1
+   ↓
+methodC()
+   ↓
+methodB()
+   ↓
+methodA()
+   ↓
+run()
+
+প্রতিটি method call-এর information StackTraceElement হিসেবে থাকে।
+
+getStackTrace() vs getAllStackTraces()
+thread.getStackTrace()
+
+→ একটি নির্দিষ্ট Thread-এর stack trace।
+
+Thread.getAllStackTraces()
+
+→ সব active Thread-এর stack trace।
+
+jstack-এর সাথে সম্পর্ক
+Thread.getAllStackTraces()
+        ↓
+Java code থেকে
+সব Thread-এর Stack Trace
+
+আর:
+
+jstack PID
+    ↓
+Java process-এর
+Thread Dump
+
+দুটিই thread debugging-এর জন্য useful।
+
+GitHub Short Note
+
+Thread.getAllStackTraces() → JVM-এর active threads-এর Thread এবং তাদের StackTraceElement[]-এর একটি Map return করে। এটি একসাথে সব thread-এর stack trace দেখার জন্য ব্যবহার করা হয়।
+```
 
