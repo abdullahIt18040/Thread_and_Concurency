@@ -301,4 +301,90 @@ GitHub Short Note
 
 Thread.getAllStackTraces() → JVM-এর active threads-এর Thread এবং তাদের StackTraceElement[]-এর একটি Map return করে। এটি একসাথে সব thread-এর stack trace দেখার জন্য ব্যবহার করা হয়।
 ```
+## Thread.yield() কী?
+```
+Thread.yield() হলো একটি static method, যা current thread-কে OS Scheduler-এর কাছে একটি hint দেয়:
+
+“আমি এখন CPU ছেড়ে দিতে পারি; অন্য কোনো runnable thread-কে CPU দিতে পারো।”
+
+Thread.yield();
+Flow
+Thread-1 Running
+      ↓
+Thread.yield()
+      ↓
+OS Scheduler-কে Hint
+      ↓
+অন্য Runnable Thread CPU পেতে পারে
+      ↓
+Thread-1 আবার CPU পেতে পারে
+Example
+public class Main {
+
+    public static void main(String[] args) {
+
+        Thread t1 = new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                System.out.println("T1: " + i);
+                Thread.yield();
+            }
+        });
+
+        Thread t2 = new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                System.out.println("T2: " + i);
+                Thread.yield();
+            }
+        });
+
+        t1.start();
+        t2.start();
+    }
+}
+
+Output নির্দিষ্ট নয়:
+
+T1: 0
+T2: 0
+T1: 1
+T2: 1
+...
+
+আবার এমনও হতে পারে:
+
+T1: 0
+T1: 1
+T2: 0
+T1: 2
+...
+
+কারণ yield() শুধু hint। Scheduler এটি মানতেই হবে এমন নয়।
+
+yield() কী করে না?
+
+yield():
+
+❌ Thread-কে WAITING করে না
+❌ Thread-কে BLOCKED করে না
+❌ নির্দিষ্ট সময়ের জন্য pause করে না
+❌ অন্য thread-কে CPU দেওয়ার guarantee দেয় না
+❌ Thread-এর কাজ বন্ধ করে না
+
+সাধারণভাবে thread RUNNABLE state-এই থাকে।
+
+sleep() vs yield()
+yield()
+→ Scheduler-কে hint দেয়
+→ নির্দিষ্ট সময় নেই
+→ guarantee নেই
+→ RUNNABLE থাকে
+
+sleep(1000)
+→ 1 second-এর জন্য sleep
+→ TIMED_WAITING
+→ 1 second পরে আবার RUNNABLE
+Short GitHub Note
+
+Thread.yield() current thread-এর CPU usage সাময়িকভাবে কমানোর জন্য OS Scheduler-কে একটি hint দেয় যাতে অন্য runnable thread CPU পেতে পারে। তবে অন্য thread CPU পাবে—এর কোনো guarantee নেই।
+```
 
