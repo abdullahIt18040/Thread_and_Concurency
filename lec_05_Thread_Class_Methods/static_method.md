@@ -168,4 +168,18 @@ Thread → আলাদা Stack → Method অনুযায়ী Stack Frame
 ```
 
 <img width="1140" height="601" alt="image" src="https://github.com/user-attachments/assets/998c0c94-d385-4378-a59e-b22b902e2124" />
+```
+Thread
+  ↓
+JVM Stack
+  ↓
+Stack Frame (method)
+  ├── Local Variables
+  ├── Operand Stack
+  └── Frame Data
+
+Shortcut:
+
+Stack Frame = একটি method চালানোর জন্য প্রয়োজনীয় local data + temporary data + execution information।
+```
 
