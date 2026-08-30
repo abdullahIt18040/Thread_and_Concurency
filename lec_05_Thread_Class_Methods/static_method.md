@@ -168,6 +168,8 @@ Thread → আলাদা Stack → Method অনুযায়ী Stack Frame
 ```
 
 <img width="1140" height="601" alt="image" src="https://github.com/user-attachments/assets/998c0c94-d385-4378-a59e-b22b902e2124" />
+
+## Summery
 ```
 Thread
   ↓
