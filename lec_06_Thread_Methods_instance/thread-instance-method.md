@@ -139,3 +139,56 @@ join(3,20) = অন্য Thread শেষ হওয়া পর্যন্ত
 
 
 ```
+### Deadlock occure 
+ thread1 acquire lock then goto suspended and go blocked state , main thread need lock but thread1 alread acquired  lock, now thread1 said please call resume but main call please lock release ,as a result dead lock occure 
+```
+import jdk.jfr.StackTrace;
+
+import javax.swing.*;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.concurrent.Callable;
+
+public class Main {
+
+    static private int value = 0;
+    private static int[] arr = {1,2,34,4,5,5,5};
+    private static int sum=0;
+
+    public synchronized static  void main(String[] args) throws InterruptedException {
+        Thread thread1 = new Thread(()->{
+
+            System.out.println("task start ..........");
+            for(int i=0;i<100;i++)
+            {
+                System.out.println("i is : "+i);
+
+            }
+
+            System.out.println("task end ..........");
+
+        });
+
+        thread1.start();
+ Thread.sleep(8);
+      thread1.suspend();
+        System.out.println("i am going to sleep  state");
+      Thread.sleep(5000);
+        thread1.resume();
+
+
+
+
+    }
+    static void sleep(int millsec)
+    {
+        try {
+            Thread.sleep(millsec);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+```
