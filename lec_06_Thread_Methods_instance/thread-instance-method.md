@@ -192,3 +192,76 @@ public class Main {
     }
 }
 ```
+### suspend() এবং resume() Method
+```
+suspend()
+
+suspend() একটি Thread-এর execution সাময়িকভাবে থামিয়ে দেয়।
+
+thread1.suspend();
+Thread-1
+   ↓
+RUNNABLE
+   ↓
+suspend()
+   ↓
+Suspended
+
+⚠️ suspend() deprecated। কারণ Thread lock ধরে থাকা অবস্থায় suspend হলে সেই lock release নাও হতে পারে।
+
+resume()
+
+resume() suspended Thread-কে আবার execution করার সুযোগ দেয়।
+
+thread1.resume();
+Thread-1
+   ↓
+Suspended
+   ↓
+resume()
+   ↓
+RUNNABLE
+   ↓
+CPU
+Example
+Thread t = new Thread(() -> {
+    while (true) {
+        System.out.println("Running...");
+    }
+});
+
+t.start();
+
+Thread.sleep(1000);
+
+t.suspend();   // ❌ Thread pause
+Thread.sleep(3000);
+
+t.resume();    // ❌ Thread আবার চলবে
+Important
+suspend()
+→ Thread execution pause করে
+→ কিন্তু acquired lock release করে না
+
+resume()
+→ suspended Thread-কে আবার চলার সুযোগ দেয়
+
+তাই:
+
+suspend()
+   ↓
+Lock ধরে থাকলে 🔒
+   ↓
+অন্য Thread BLOCKED হতে পারে
+   ↓
+Deadlock-এর risk
+Modern Java
+
+Suspend/Resume এর পরিবর্তে সাধারণত wait()/notify(), Lock, অথবা interrupt() ব্যবহার করা হয়।
+
+GitHub Short Note
+
+suspend() → Thread-এর execution pause করে।
+resume() → suspended Thread-এর execution পুনরায় চালু করার সুযোগ দেয়।
+দুটিই deprecated এবং lock ধরে থাকা অবস্থায় ব্যবহার করলে deadlock-এর risk থাকে।
+```
