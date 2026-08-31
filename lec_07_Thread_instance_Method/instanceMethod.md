@@ -49,3 +49,34 @@ t.start();
 
 t.interrupt();
 ```
+### Thread.checkAccess() Method
+
+```
+checkAccess() একটি security/access-checking method, যা current code-এর ওই Thread object-এর উপর access করার permission আছে কিনা যাচাই করত।
+
+thread.checkAccess();
+সহজভাবে
+
+checkAccess() → এই Thread-এর উপর access করার অনুমতি আছে কি না check করে।
+
+যদি access না থাকে, তাহলে সাধারণত:
+
+SecurityException
+
+হতে পারে।
+
+Example
+Thread t = new Thread(() -> {
+    System.out.println("Running...");
+});
+
+t.checkAccess();   // access check
+t.start();
+Important
+
+বর্তমান Java-তে Thread.checkAccess() deprecated (Java 17 থেকে), কারণ পুরোনো SecurityManager-ভিত্তিক security mechanism deprecated/removed হওয়ার পথে।
+
+Short Note
+
+Thread.checkAccess() → একটি Thread-এর উপর caller-এর access permission check করার জন্য ব্যবহৃত হতো। Permission না থাকলে SecurityException হতে পারে। বর্তমানে এটি deprecated।
+```
