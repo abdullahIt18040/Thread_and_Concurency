@@ -284,3 +284,360 @@ synchronized / Lock / Atomic / Concurrent Collection
 
 Thread Safety = Multiple threads একই resource নিয়ে কাজ করলেও data consistency এবং correctness বজায় থাকা।
 ```
+### Synchronized Method কী?
+```
+
+Java-তে synchronized method এমন একটি method যেখানে একই সময়ে একই object-এর জন্য মাত্র একটি thread method-এর ভিতরের code execute করতে পারে।
+
+সহজভাবে:
+
+একজন Thread ঢুকলে অন্য Thread-কে অপেক্ষা করতে হয়।
+
+🔴 Without synchronized
+class Counter {
+    int count = 0;
+
+    void increment() {
+        count++;
+    }
+}
+
+ধরি:
+
+Thread 1 ──→ increment()
+Thread 2 ──→ increment()
+
+দুই thread একই সময়ে count++ করতে পারে।
+
+ফলে Race Condition হতে পারে।
+
+🟢 With synchronized
+class Counter {
+    int count = 0;
+
+    synchronized void increment() {
+        count++;
+    }
+}
+
+এখন:
+
+Thread 1
+   ↓
+🔒 Lock নেয়
+   ↓
+increment()
+   ↓
+🔓 Lock release
+   ↓
+Thread 2
+   ↓
+🔒 Lock নেয়
+   ↓
+increment()
+
+অর্থাৎ একই object-এর একই synchronized method-এ একই সময়ে একজন thread ঢুকতে পারে।
+
+🧠 কোন Lock ব্যবহার হয়?
+
+যদি method হয়:
+
+synchronized void increment() {
+    count++;
+}
+
+এটি instance synchronized method।
+
+তাহলে lock নেওয়া হয় object-এর উপর।
+
+Counter counter = new Counter();
+
+এখানে:
+
+counter object
+      ↓
+   🔒 Lock
+      ↓
+increment()
+⚠️ দুইটি Object হলে?
+Counter c1 = new Counter();
+Counter c2 = new Counter();
+
+এদের lock আলাদা:
+
+c1 → 🔒 Lock 1
+c2 → 🔒 Lock 2
+
+তাই c1-এর synchronized method চলার সময় c2-এর synchronized method চলতে পারে।
+
+🔵 Static Synchronized Method
+
+যদি লিখি:
+
+static synchronized void test() {
+    // code
+}
+
+তাহলে object-এর lock নয়, Class-এর lock ব্যবহার হয়।
+
+static synchronized method
+          ↓
+     Class Lock
+          ↓
+     🔒 Main.class
+⭐ Short Note
+
+Synchronized method = একই lock-এর মাধ্যমে এক সময়ে শুধু একটি thread method execute করতে পারে।
+
+Thread 1 → 🔒 → Method → 🔓
+Thread 2 → Wait → 🔒 → Method → 🔓
+```
+### Object Lock vs Class Lock বুঝি।
+```
+1️⃣ synchronized Instance Method → Object Lock
+
+Code:
+
+class Test {
+
+    synchronized void test() {
+        System.out.println("Test method");
+    }
+}
+
+এখানে test() হলো instance method।
+
+ধরি আমরা ২টা object বানালাম:
+
+Test obj1 = new Test();
+Test obj2 = new Test();
+
+প্রতিটি object-এর নিজস্ব lock আছে:
+
+obj1 → 🔒 Lock 1
+
+obj2 → 🔒 Lock 2
+
+তাই:
+
+Thread t1 = new Thread(() -> obj1.test());
+Thread t2 = new Thread(() -> obj2.test());
+
+t1.start();
+t2.start();
+
+দুই thread একই সময়ে test() execute করতে পারবে।
+
+Thread 1              Thread 2
+   ↓                     ↓
+obj1.test()           obj2.test()
+   ↓                     ↓
+🔒 Lock 1              🔒 Lock 2
+   ↓                     ↓
+ Execute               Execute
+কিন্তু একই object হলে
+Test obj = new Test();
+
+Thread t1 = new Thread(() -> obj.test());
+Thread t2 = new Thread(() -> obj.test());
+
+এখন দুটো thread-এর target একই object:
+
+Thread 1 ──→ obj → 🔒
+Thread 2 ──→ obj → অপেক্ষা
+
+তাই এক সময়ে একজনই execute করবে।
+
+2️⃣ static synchronized → Class Lock
+
+এখন:
+
+class Test {
+
+    static synchronized void test() {
+        System.out.println("Test method");
+    }
+}
+
+এখানে method হলো static।
+
+তাই object-এর lock ব্যবহার হবে না।
+
+Class-এর lock ব্যবহার হবে।
+
+Test.class
+   ↓
+ 🔒 Class Lock
+
+ধরি:
+
+Test obj1 = new Test();
+Test obj2 = new Test();
+
+এমনকি object দুইটি আলাদা হলেও:
+
+obj1 ──┐
+       ├──→ Test.class → 🔒
+obj2 ──┘
+
+দুই thread যদি:
+
+obj1.test();
+obj2.test();
+
+call করে, তবুও একই Test.class lock ব্যবহার করবে।
+
+Thread 1              Thread 2
+   ↓                     ↓
+obj1.test()           obj2.test()
+   ↓                     ↓
+   └────→ Test.class ←───┘
+              🔒
+              ↓
+        একজন execute করবে
+        অন্যজন wait করবে
+🧠 সবচেয়ে সহজভাবে মনে রাখুন
+Instance synchronized
+synchronized void test()
+
+মানে:
+
+"আমার Object-এর lock নাও।"
+
+obj1 → 🔒
+obj2 → 🔒
+
+আলাদা object → আলাদা lock → একই সময়ে কাজ করতে পারে।
+
+Static synchronized
+static synchronized void test()
+
+মানে:
+
+"আমার Class-এর lock নাও।"
+
+Test.class → 🔒
+
+সব object একই class-এর → একই class lock → এক সময়ে একজন।
+
+⭐ One-line Note
+synchronized method
+      ↓
+Object Lock
+
+static synchronized method
+      ↓
+Class Lock
+      ↓
+ClassName.class
+
+Shortcut:
+👉 Instance = Object lock
+👉 Static = Class lock
+```
+### Intrinsic Lock কী?
+```
+Java-তে Intrinsic Lock হলো JVM-এর দেওয়া built-in lock, যা প্রতিটি Java object-এর সাথে automatically থাকে।
+
+সহজভাবে:
+
+প্রতিটি object-এর সাথে একটি invisible lock থাকে। synchronized সেই lock ব্যবহার করে।
+
+1️⃣ Instance synchronized হলে
+class Test {
+
+    synchronized void test() {
+        System.out.println("Hello");
+    }
+}
+
+ধরি:
+
+Test obj = new Test();
+
+তাহলে conceptually:
+
+obj
+┌───────────────┐
+│ Object        │
+│               │
+│ 🔒 Intrinsic  │
+│    Lock       │
+└───────────────┘
+
+যখন Thread 1 obj.test() call করে:
+
+Thread 1
+   ↓
+obj.test()
+   ↓
+🔒 obj-এর Intrinsic Lock
+   ↓
+method execute
+   ↓
+🔓 Lock release
+
+Thread 2 একই সময়ে obj.test() করতে চাইলে:
+
+Thread 2
+   ↓
+obj.test()
+   ↓
+🔒 Lock already taken
+   ↓
+WAIT
+2️⃣ দুইটি Object হলে
+Test obj1 = new Test();
+Test obj2 = new Test();
+
+প্রতিটি object-এর আলাদা intrinsic lock:
+
+obj1 → 🔒 Lock 1
+
+obj2 → 🔒 Lock 2
+
+তাই:
+
+Thread 1 → obj1.test() → 🔒
+Thread 2 → obj2.test() → 🔒
+
+দুই thread একই সময়ে execute করতে পারে।
+
+3️⃣ static synchronized হলে?
+static synchronized void test() {
+}
+
+এখানে কোনো particular object-এর lock নয়।
+
+Class object-এর intrinsic lock ব্যবহার হয়।
+
+Test.class
+    ↓
+🔒 Intrinsic Lock
+
+তাই:
+
+obj1.test()
+obj2.test()
+   ↓
+Test.class
+   ↓
+🔒 একই Lock
+
+এক সময়ে একজন execute করবে।
+
+🧠 Intrinsic Lock + synchronized
+synchronized
+     ↓
+Intrinsic Lock
+     ↓
+এক সময়ে একজন Thread
+     ↓
+Shared Resource নিরাপদ রাখা
+⭐ Short Note
+
+Intrinsic Lock = Java object-এর সাথে থাকা built-in lock, যেটা synchronized ব্যবহার করে thread synchronization করে।
+
+আরেকটি গুরুত্বপূর্ণ শব্দ হলো Monitor—Java-তে সাধারণভাবে Intrinsic Lock এবং Monitor শব্দ দুটো খুব কাছাকাছি অর্থে ব্যবহৃত হয়।
+```
+
