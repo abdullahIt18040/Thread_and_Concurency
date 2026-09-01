@@ -264,3 +264,39 @@ public class Main {
 
 }
 ```
+### ekta thread memory allocation kore dite pari ki poriman jaiga nibe stack e  
+
+```
+import jdk.jfr.StackTrace;
+
+import javax.swing.*;
+import java.math.BigInteger;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.concurrent.Callable;
+
+public class Main {
+
+    public synchronized static  void main(String[] args) throws InterruptedException {
+        Thread T= new Thread(Thread.currentThread().getThreadGroup(),()->{
+            BigInteger N=  new BigInteger("100000");
+            System.out.println("factorial sisv  "+fact(N));
+
+
+        },"fact",100*1024*1024);
+        T.start();
+
+    }
+    static BigInteger fact(BigInteger n)
+    {
+        if(n.equals(BigInteger.ZERO)) return  BigInteger.ONE;
+        return n.multiply(fact(n.subtract(BigInteger.ONE))
+        );
+    }
+
+}
+```
+
+
