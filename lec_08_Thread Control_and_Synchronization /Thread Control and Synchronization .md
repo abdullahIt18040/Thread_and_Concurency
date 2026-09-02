@@ -722,7 +722,9 @@ Thread-2 → obj2.work();  // obj2 lock
 `obj1` এবং `obj2`-এর **আলাদা intrinsic lock** আছে।
 
 তাই দুইটি Thread **একসাথে `work()` execute করতে পারে**।
- problem solution :
+
+ ### problem solution :
+ ```
  class test {
    static  synchronized void work() {
         // task
@@ -730,6 +732,7 @@ Thread-2 → obj2.work();  // obj2 lock
 }
 
 `obj1` এবং `obj2`-এর **আলাদা class level  lock** আছে। তাই  একটি Thread  `work()` execute করতে পারে**।
+```
  
 > **Instance synchronized method → Object-এর lock**
 > **Same object → Same lock → One thread at a time**
