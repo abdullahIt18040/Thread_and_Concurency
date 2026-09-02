@@ -725,4 +725,52 @@ Thread-2 → obj2.work();  // obj2 lock
 
 > **Instance synchronized method → Object-এর lock**
 > **Same object → Same lock → One thread at a time**
+### my code class level and object level lock 
+```
+import jdk.jfr.StackTrace;
 
+import javax.swing.*;
+import java.math.BigInteger;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.concurrent.Callable;
+
+public class Main {
+    static int cnt=0;
+  synchronized void increment()
+    {
+        cnt = cnt+1;
+    }
+
+    public  static  void main(String[] args) throws InterruptedException {
+        Main m1 = new Main();
+        Main m2 = new Main();
+
+     Thread t1= new Thread(()->{
+         for(int i=0;i<10000;i++)
+         {
+             m1.increment();
+         }
+     });
+
+    Thread t2= new Thread(()->{
+        for(int i=0;i<20000;i++)
+        {
+            m2.increment();
+        }
+    });
+
+
+
+    t1.start();
+    t2.start();
+    t1.join();
+    t2.join();
+
+        System.out.println("count is "+ cnt);
+}
+
+}
+```
