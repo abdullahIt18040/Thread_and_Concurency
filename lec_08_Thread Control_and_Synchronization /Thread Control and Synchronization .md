@@ -1,6 +1,6 @@
 ### Shared Resource কী? — সহজ বাংলায়
 all Questuion is :
-![Uploading image.png…]()
+<img width="562" height="238" alt="image" src="https://github.com/user-attachments/assets/5e82f376-08bd-4f28-a5f0-94e90666197d" />
 
 
 Shared Resource হলো এমন কোনো data, object, variable বা resource, যেটা একাধিক thread একসাথে access বা ব্যবহার করতে পারে।
