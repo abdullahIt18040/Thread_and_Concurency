@@ -1,4 +1,7 @@
 ### Shared Resource কী? — সহজ বাংলায়
+all Questuion is :
+![Uploading image.png…]()
+
 
 Shared Resource হলো এমন কোনো data, object, variable বা resource, যেটা একাধিক thread একসাথে access বা ব্যবহার করতে পারে।
 ```
@@ -649,6 +652,7 @@ Intrinsic Lock = Java object-এর সাথে থাকা built-in lock, য
 ## Synchronized Instance Method
 
 ```java
+
 class Test {
     synchronized void work() {
         // task
@@ -659,6 +663,7 @@ Test obj = new Test();
 
 Thread-1 → obj.work();
 Thread-2 → obj.work();
+
 ```
 
 `work()` একটি **synchronized instance method**, তাই এটি `obj`-এর **intrinsic lock** ব্যবহার করে।
@@ -731,7 +736,7 @@ Thread-2 → obj2.work();  // obj2 lock
     }
 }
 
-`obj1` এবং `obj2`-এর **আলাদা class level  lock** আছে। তাই  একটি Thread  `work()` execute করতে পারে**।
+`obj1` এবং `obj2`-এর **একটি  class level  lock** আছে। তাই  একটি Thread  `work()` execute করতে পারে**।
 ```
  
 > **Instance synchronized method → Object-এর lock**
@@ -784,4 +789,145 @@ public class Main {
 }
 
 }
+```
+## Stack vs Heap — Thread Safety
+
+### Stack → Thread-confined
+
+* প্রতিটি Thread-এর **নিজস্ব Stack** থাকে।
+* এক Thread-এর local variable অন্য Thread সরাসরি access করতে পারে না।
+* তাই Stack-এর local data সাধারণত **thread-safe by isolation**।
+
+```text
+Thread-1 → Own Stack
+Thread-2 → Own Stack
+Thread-3 → Own Stack
+```
+
+### Heap → Shared Memory
+
+* Heap-এ **Objects এবং Arrays** থাকে।
+* একই Object একাধিক Thread access করতে পারে।
+* তাই shared object-এর data-তে **race condition** হতে পারে।
+* প্রয়োজন হলে `synchronized`, `Lock`, `Atomic` ইত্যাদি ব্যবহার করতে হয়।
+
+```text
+              HEAP
+        ┌──────────────┐
+        │ Counter      │
+        │ count = 0    │
+        └──────────────┘
+          ↑          ↑
+      Thread-1    Thread-2
+```
+
+### Important Rule
+
+```text
+Stack
+  ↓
+Thread-এর নিজস্ব
+  ↓
+Usually safe by isolation ✅
+
+
+Heap
+  ↓
+Multiple Thread share করতে পারে
+  ↓
+Synchronization প্রয়োজন হতে পারে 🔒
+```
+
+> ⚠️ **Heap নিজে thread-unsafe নয়।**
+> Heap শুধু একটি memory area। সেখানে থাকা Object **thread-safe বা non-thread-safe**—দুটোই হতে পারে।
+### Block-Level Lock
+```
+Java-তে block-level lock হলো synchronized block ব্যবহার করে method-এর নির্দিষ্ট অংশকে lock করা।
+
+synchronized (obj) {
+    // critical section
+}
+
+এখানে obj-এর intrinsic lock নেওয়া হয়।
+
+Example
+class Counter {
+    int count = 0;
+
+    void increment() {
+
+        // Other code
+        System.out.println("Start");
+
+        synchronized (this) {
+            count++;
+        }
+
+        // Other code
+        System.out.println("End");
+    }
+}
+
+এখানে শুধু:
+
+synchronized (this) {
+    count++;
+}
+
+এই অংশটি lock-এর মধ্যে আছে।
+
+Execution
+Thread-1
+   ↓
+increment()
+   ↓
+Other code
+   ↓
+🔒 Lock acquire
+   ↓
+count++
+   ↓
+🔓 Lock release
+   ↓
+Other code
+
+Thread-2 একই সময়ে এলে:
+
+Thread-2
+   ↓
+synchronized(this)
+   ↓
+Lock already held
+   ↓
+BLOCKED
+
+Thread-1 lock release করলে Thread-2 lock পাবে।
+
+কেন Block-Level Lock?
+
+পুরো method-কে synchronized না করে শুধু critical section-কে lock করার জন্য।
+
+// Method-level lock
+synchronized void increment() {
+    // পুরো method locked
+}
+
+vs.
+
+// Block-level lock
+void increment() {
+
+    // Not locked
+
+    synchronized (this) {
+        // Only this block is locked
+    }
+
+    // Not locked
+}
+
+Method-level synchronization → পুরো method lock
+Block-level synchronization → শুধু নির্দিষ্ট block lock
+
+এতে unnecessary code lock না করে critical section ছোট রাখা যায়।
 ```
