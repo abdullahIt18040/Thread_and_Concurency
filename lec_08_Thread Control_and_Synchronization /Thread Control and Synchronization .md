@@ -640,4 +640,89 @@ Intrinsic Lock = Java object-এর সাথে থাকা built-in lock, য
 
 আরেকটি গুরুত্বপূর্ণ শব্দ হলো Monitor—Java-তে সাধারণভাবে Intrinsic Lock এবং Monitor শব্দ দুটো খুব কাছাকাছি অর্থে ব্যবহৃত হয়।
 ```
+🟦 Stack → Method + Local Variable + Reference
+🟩 Heap → Object + Array + Instance Data
+###
+```
+🟦 Stack → Method + Local Variable + Reference
+🟩 Heap → Object + Array + Instance Data
+## Synchronized Instance Method
+
+```java
+class Test {
+    synchronized void work() {
+        // task
+    }
+}
+
+Test obj = new Test();
+
+Thread-1 → obj.work();
+Thread-2 → obj.work();
+```
+
+`work()` একটি **synchronized instance method**, তাই এটি `obj`-এর **intrinsic lock** ব্যবহার করে।
+
+### Execution
+
+```text
+Thread-1
+   ↓
+obj.work()
+   ↓
+obj lock acquire 🔒
+   ↓
+method execute
+   ↓
+Thread-2 → obj.work()
+   ↓
+lock already held by Thread-1
+   ↓
+Thread-2 → BLOCKED
+```
+
+Thread-1 method শেষ করলে:
+
+```text
+Thread-1
+   ↓
+work() শেষ
+   ↓
+lock release 🔓
+   ↓
+Thread-2 lock পায়
+   ↓
+Thread-2 → RUNNABLE
+   ↓
+work() execute
+```
+
+### Important Rule
+
+```text
+Same Object
+     +
+Same synchronized instance method
+     ↓
+Same Object Lock 🔒
+     ↓
+একসাথে একজন Thread execute করবে
+```
+
+### Different Objects
+
+```java
+Test obj1 = new Test();
+Test obj2 = new Test();
+
+Thread-1 → obj1.work();  // obj1 lock
+Thread-2 → obj2.work();  // obj2 lock
+```
+
+`obj1` এবং `obj2`-এর **আলাদা intrinsic lock** আছে।
+
+তাই দুইটি Thread **একসাথে `work()` execute করতে পারে**।
+
+> **Instance synchronized method → Object-এর lock**
+> **Same object → Same lock → One thread at a time**
 
