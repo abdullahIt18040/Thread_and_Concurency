@@ -74,7 +74,7 @@ public class Main {
 
 }
 ```
-### Deadlock — Practical Example
+### Deadlock — Practical Example and how to find it . 
 ```
 
 বাস্তব জীবনে ধরুন দুইজন মানুষ আছে এবং দুইটি resource আছে:
@@ -199,5 +199,107 @@ T2 → Lock B → wants Lock A
                 ↓
 ```
 
+### starvation and it cause
+```
+Starvation কী?
 
+Starvation হলো এমন একটি অবস্থা যেখানে কোনো Thread অনেকক্ষণ CPU বা required resource পাওয়ার সুযোগ না পেয়ে অপেক্ষা করতে থাকে, কারণ অন্য Thread-গুলো বারবার resource/CPU পেয়ে যাচ্ছে।
+
+সহজভাবে:
+
+একটি Thread কাজ করার সুযোগ পাচ্ছে না, অন্য Thread বারবার সুযোগ পাচ্ছে → Starvation
+
+Practical Example
+
+ধরো ৩টা Thread আছে:
+
+Thread-1 → CPU পেয়ে কাজ করছে
+Thread-2 → CPU পেয়ে কাজ করছে
+Thread-3 → CPU পাওয়ার জন্য অপেক্ষা করছে
+
+যদি Thread-1 এবং Thread-2 বারবার CPU পায় এবং Thread-3 দীর্ঘসময় CPU না পায়:
+
+T1 → Run → Run → Run → Run
+T2 → Run → Run → Run
+T3 → Wait → Wait → Wait → Wait
+                    ↑
+                Starvation
+```
+## Starvation-এর কারণ
+```
+
+Unfair Thread Scheduling
+Scheduler যদি Thread-গুলোর মধ্যে CPU fairly distribute না করে, তাহলে কোনো Thread বারবার CPU না পেয়ে অপেক্ষা করতে পারে।
+
+T1 → CPU → CPU → CPU → CPU
+T2 → Wait → Wait → Wait → Wait
+                 ↑
+             Starvation
+High Thread Priority
+High-priority Thread বেশি CPU opportunity পেলে low-priority Thread দীর্ঘসময় অপেক্ষা করতে পারে।
+Unfair Lock
+Lock fair না হলে একই Thread বারবার lock পেতে পারে এবং অন্য Thread অপেক্ষা করতে পারে।
+Long-running Thread
+কোনো Thread দীর্ঘসময় CPU বা resource ব্যবহার করলে অন্য Thread কম সুযোগ পেতে পারে।
+
+Short note:
+
+Starvation = কোনো Thread দীর্ঘসময় CPU/resource না পেয়ে অপেক্ষা করা।
+Main causes: Unfair thread scheduling, high priority, unfair lock, long-running
+```
+### Livelock কী?
+```
+
+Livelock হলো এমন একটি অবস্থা যেখানে একাধিক Thread blocked নয়, তারা continuously কাজ করছে বা state পরিবর্তন করছে, কিন্তু কাজের কোনো progress হচ্ছে না।
+
+সহজভাবে:
+
+🔴 Deadlock: Thread-গুলো আটকে আছে এবং অপেক্ষা করছে।
+🟡 Livelock: Thread-গুলো কাজ করছে, কিন্তু কোনো কাজ শেষ করতে পারছে না।
+
+Practical Example: দুইজন মানুষ দরজায়
+
+ধরো, একজন আরেকজনের সামনে দিয়ে দরজা পার হতে যাচ্ছে।
+
+Person A → ডানে সরে
+Person B → ডানে সরে
+
+Person A → বামে সরে
+Person B → বামে সরে
+
+Person A → ডানে সরে
+Person B → ডানে সরে
+
+দুজনেই একে অপরকে সুযোগ দেওয়ার চেষ্টা করছে, কিন্তু দুজন একই direction-এ move করছে, তাই কেউ দরজা পার হতে পারছে না।
+
+এটাই Livelock।
+
+Java Example
+while (true) {
+
+    if (lock.tryLock()) {
+        try {
+            // কাজ করার চেষ্টা
+        } finally {
+            lock.unlock();
+        }
+    } else {
+        // অন্য Thread-কে সুযোগ দেওয়ার জন্য lock ছেড়ে দিল
+        Thread.yield();
+    }
+}
+
+ধরো দুই Thread-ই একইভাবে কাজ করছে:
+
+T1 → Lock নিতে চেষ্টা → conflict → ছেড়ে দিল
+T2 → Lock নিতে চেষ্টা → conflict → ছেড়ে দিল
+
+T1 → আবার চেষ্টা → ছেড়ে দিল
+T2 → আবার চেষ্টা → ছেড়ে দিল
+
+       ↓
+  No progress
+       ↓
+    Livelock
+```
 
