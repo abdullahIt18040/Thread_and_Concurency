@@ -302,4 +302,107 @@ T2 → আবার চেষ্টা → ছেড়ে দিল
        ↓
     Livelock
 ```
+### spoon spouse problelm livelock
+## my code is
+```
+import jdk.jfr.StackTrace;
 
+import javax.swing.*;
+import java.math.BigInteger;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.concurrent.Callable;
+
+class Spoon{
+
+    private Spouse owner;
+    public Spoon(Spouse owner)
+    {
+        this.owner= owner;
+    }
+    public synchronized void eaten()
+    {
+        System.out.println("eating.........."+owner);
+
+    }
+
+    public Spouse getOwner() {
+        return owner;
+    }
+
+    public synchronized void setOwner(Spouse owner) {
+        this.owner = owner;
+    }
+}
+
+class Spouse{
+
+    private  String name;
+    private boolean hungry= true;
+
+    public Spouse(String name){
+       this.name=name;
+    }
+    public void dinnerMyDear(Spouse spouse,Spoon spoon)
+    {
+        while (true)
+        {
+            if(spoon.getOwner()!=this)
+            {
+                try {
+                    Thread.sleep(1000);
+                    continue;
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if (spouse.hungry)
+            {
+                spoon.setOwner(spouse);
+                System.out.printf("my dear %s eat first  please ,status :: %s \n",spouse.name,Thread.currentThread()
+                        .getState().name());
+                continue;
+            }
+            spoon.eaten();
+            hungry= false;
+
+            break;
+        }
+
+    }
+
+    @Override
+    public String toString() {
+        return "Spouse{" +
+                "name='" + name + '\'' +
+                '}';
+    }
+}
+
+
+public class Main {
+
+    public  static  void main(String[] args) throws InterruptedException {
+
+Spouse wife = new Spouse("Hashiyara Khatun.....");
+Spouse husband =new Spouse("ABDULLAH ");
+Spoon husbandspoon = new Spoon(husband);
+Thread T1= new Thread(()->
+{
+    wife.dinnerMyDear(husband,husbandspoon);
+});
+Thread T2 = new Thread(()->{
+    husband.dinnerMyDear(wife,husbandspoon);
+});
+
+T2.start();
+T1.start();
+
+        System.out.println("main task end.....");
+
+}
+
+}
+```
