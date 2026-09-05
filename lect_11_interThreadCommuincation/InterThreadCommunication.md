@@ -132,4 +132,65 @@ Still holding lock
 synchronized block শেষ
      ↓
 Lock released
+notifyAll() কী?
+
+notifyAll() হলো একটি Object-এর monitor-এর উপর wait() করে থাকা সব Thread-কে wake/signal করার method।
+
+ধরো obj-এর উপর ৩টি thread waiting:
+
+              obj
+               │
+       ┌───────┼────────┐
+       ↓       ↓        ↓
+     Thread1 Thread2  Thread3
+      WAITING WAITING  WAITING
+
+এখন অন্য একটি thread:
+
+synchronized (obj) {
+    obj.notifyAll();
+}
+
+করলে:
+
+Thread1 ──→ BLOCKED
+Thread2 ──→ BLOCKED
+Thread3 ──→ BLOCKED
+
+সবাই wake-up করার জন্য চেষ্টা করবে, কিন্তু তারা সঙ্গে সঙ্গে execute করবে না।
+
+কারণ notifyAll() করার thread এখনও obj-এর lock ধরে রেখেছে।
+তারপর কী হয়?
+
+যখন synchronized block শেষ হয়:
+
+synchronized (obj) {
+    obj.notifyAll();
+}
+ // এখানে lock release
+
+তখন waiting thread-গুলো lock পাওয়ার জন্য compete করবে।
+
+             notifyAll()
+                  ↓
+        ┌─────────┼─────────┐
+        ↓         ↓         ↓
+    Thread1   Thread2   Thread3
+     BLOCKED   BLOCKED   BLOCKED
+        └─────────┼─────────┘
+                  ↓
+          Lock পাওয়ার চেষ্টা
+                  ↓
+        একজন আগে lock পাবে
+                  ↓
+              RUNNING
+notify() বনাম notifyAll()
+Method	কী করে
+notify()	Waiting thread থেকে একটি thread-কে signal করে
+notifyAll()	Waiting থাকা সব thread-কে signal করে
+
+notifyAll() কোনো Thread-কে সরাসরি RUNNING করে না। এটি Object-এর monitor-এর উপর waiting থাকা সব Thread-কে waiting থেকে বের হয়ে lock পাওয়ার প্রতিযোগিতায় পাঠায়।
+
+
+
 ```
