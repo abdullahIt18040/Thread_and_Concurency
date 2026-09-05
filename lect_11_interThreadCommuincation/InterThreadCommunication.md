@@ -194,3 +194,97 @@ notifyAll() কোনো Thread-কে সরাসরি RUNNING করে ন�
 
 
 ```
+### যদি notify() / notifyAll() Thread level-এ থাকত
+```
+ধরুন:
+
+Thread t1;
+Thread t2;
+Thread t3;
+
+যদি এমন হতো:
+
+t1.notify();
+
+তাহলে প্রশ্ন আসত:
+
+t1 কাকে notify করবে? t2-কে? t3-কে? নাকি অন্য কোনো thread-কে?
+
+অর্থাৎ Thread-কে অন্য কোন Thread-এর সাথে communication করতে হবে সেটা জানতে হতো।
+
+Java-তে Object level কেন?
+
+Java বলছে:
+
+"Thread-এর সাথে সরাসরি communication না করে, একটি shared Object-এর মাধ্যমে communication করো।"
+
+যেমন:
+
+Object lock = new Object();
+
+দুইটি thread একই Object ব্যবহার করছে:
+
+        Shared Object
+             │
+      ┌──────┴──────┐
+      ↓             ↓
+   Thread-1      Thread-2
+      │             │
+      └─── lock ────┘
+
+Thread-1:
+
+synchronized (lock) {
+    lock.wait();
+}
+
+Thread-2:
+
+synchronized (lock) {
+    lock.notify();
+}
+
+এখানে Thread-2-কে জানতে হচ্ছে না:
+
+"Thread-1-এর নাম কী?"
+
+সে শুধু জানে:
+
+"এই lock Object-এর উপর যে thread অপেক্ষা করছে, তাকে notify করো।"
+
+notifyAll() হলে আরও পরিষ্কার
+              lock Object
+                  │
+        ┌─────────┼─────────┐
+        ↓         ↓         ↓
+      T1          T2        T3
+    WAITING     WAITING   WAITING
+synchronized (lock) {
+    lock.notifyAll();
+}
+
+এখানে Thread-2-কে T1, T2, T3—কাউকেই আলাদাভাবে চিনতে হচ্ছে না।
+
+Object-এর monitor-এর উপর যারা wait করছে, তাদের সবাইকে signal করা হচ্ছে।
+
+তাই মূল ধারণা
+❌ Thread-level communication
+
+T1 ─────→ T2
+     "তোমাকে notify করছি"
+
+এখানে Thread-কে অন্য Thread সম্পর্কে জানতে হবে।
+
+
+✅ Object-level communication
+
+T1 ──┐
+     ├──→ Shared Object ←── notify()
+T2 ──┘
+
+এক লাইনে মনে রাখুন:
+
+wait(), notify(), notifyAll() Object level-এ থাকার মূল সুবিধা হলো threads-কে একে অপরকে directly জানার প্রয়োজন হয় না; তারা একটি shared Object-এর monitor-এর মাধ্যমে communicate করে।
+
+আরেকটি গুরুত্বপূর্ণ বিষয়: wait()/notify() Thread-এর নাম বা identity নিয়ে কাজ করে না—এগুলো কোন Object-এর monitor-এর উপর thread অপেক্ষা করছে সেটার ভিত্তিতে কাজ করে।
+```
