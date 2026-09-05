@@ -283,7 +283,64 @@ T1 ──┐
 T2 ──┘
 
 এক লাইনে মনে রাখুন:
+```
+### my java code for notify() and notifuyAll();
+```
+public class Main {
 
+    public static void main(String[] args) throws InterruptedException {
+
+        Object object = new Object();
+
+        Thread t1 = new Thread(() -> {
+            try {
+                Thread.sleep(5000);
+
+                synchronized (object) {
+                    System.out.println("T1: notifyAll()");
+                    object.notifyAll();
+                }
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            System.out.println("T1: send email");
+        });
+
+        Thread t2 = new Thread(() -> {
+
+            synchronized (object) {
+                try {
+                    System.out.println("T2: waiting...");
+                    object.wait();
+                    System.out.println("T2: wake up");
+
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+
+        // আগে T2-কে waiting করাই
+        t2.start();
+
+        Thread.sleep(100);
+
+        // তারপর T1 notify করবে
+        t1.start();
+
+        System.out.println("Main: waiting...");
+
+        synchronized (object) {
+            object.wait();
+        }
+
+        System.out.println("Main: wake up");
+        System.out.println("Hello, World!");
+    }
+}
+```
 wait(), notify(), notifyAll() Object level-এ থাকার মূল সুবিধা হলো threads-কে একে অপরকে directly জানার প্রয়োজন হয় না; তারা একটি shared Object-এর monitor-এর মাধ্যমে communicate করে।
 
 আরেকটি গুরুত্বপূর্ণ বিষয়: wait()/notify() Thread-এর নাম বা identity নিয়ে কাজ করে না—এগুলো কোন Object-এর monitor-এর উপর thread অপেক্ষা করছে সেটার ভিত্তিতে কাজ করে।
