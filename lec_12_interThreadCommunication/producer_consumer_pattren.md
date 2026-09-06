@@ -2,122 +2,205 @@
 
 <img width="1083" height="583" alt="image" src="https://github.com/user-attachments/assets/d82a7ed6-c942-4c17-9a58-201ba890d036" />
 
-## Busy Waiting কী?
+# Busy Waiting
 
-```
-Busy Waiting হলো এমন একটি situation যেখানে একটি thread কোনো condition true হওয়ার জন্য বারবার check করতে থাকে, কিন্তু কাজ না থাকলেও CPU ব্যবহার করতে থাকে।
+## What is Busy Waiting?
+
+**Busy Waiting** হলো এমন একটি situation যেখানে একটি thread কোনো condition `true` হওয়ার জন্য বারবার check করতে থাকে, কিন্তু কোনো useful কাজ না করেও **CPU continuously ব্যবহার করে**।
 
 সহজভাবে:
 
-Thread ঘুমাচ্ছে না, কাজও করছে না—শুধু বারবার condition check করছে।
+> **Thread ঘুমাচ্ছে না, কাজও করছে না—শুধু বারবার condition check করছে।**
 
-Example
+### Example
+
+```java
 boolean dataAvailable = false;
 
 while (!dataAvailable) {
-    // বারবার check করছে
+    // বারবার condition check
 }
+```
 
-এখানে Thread:
+Flow:
 
+```text
 dataAvailable?
-     ↓
-   false
-     ↓
-আবার check
-     ↓
-   false
-     ↓
-আবার check
-     ↓
-   false
-     ↓
-...
+      ↓
+    false
+      ↓
+  check again
+      ↓
+    false
+      ↓
+  check again
+      ↓
+    false
+      ↓
+     ...
+```
 
-এই loop চলার সময় CPU continuously ব্যবহার হচ্ছে।
+এই loop চলার সময় thread CPU ব্যবহার করতে থাকে।
 
-Practical Producer-Consumer Example
+---
 
-ধরো Consumer data-এর জন্য অপেক্ষা করছে:
+## Producer-Consumer Example
 
+ধরো, Consumer queue থেকে data নেওয়ার জন্য অপেক্ষা করছে:
+
+```java
 while (queue.isEmpty()) {
-    // অপেক্ষা
+    // waiting
 }
+```
 
 Queue empty থাকা পর্যন্ত Consumer বারবার:
 
+```text
 queue.isEmpty()
 queue.isEmpty()
 queue.isEmpty()
 queue.isEmpty()
 ...
+```
 
-check করছে।
+check করবে।
 
-এটাই Busy Waiting।
+এটাই **Busy Waiting**।
 
-wait() ব্যবহার করলে কী হয়?
+---
 
-Busy waiting-এর পরিবর্তে:
+## Problem with Busy Waiting
 
+Busy Waiting-এর প্রধান সমস্যা:
+
+* CPU unnecessarily ব্যবহার হয়
+* CPU time waste হয়
+* Performance কমতে পারে
+* Long waiting-এর ক্ষেত্রে inefficient
+
+---
+
+# `wait()` ব্যবহার করলে
+
+Busy Waiting-এর পরিবর্তে `wait()` ব্যবহার করা যায়:
+
+```java
 synchronized (queue) {
 
     while (queue.isEmpty()) {
         queue.wait();
     }
 
-    // consume
+    // consume data
 }
+```
 
-এখন:
+এখন flow হবে:
 
-Queue empty
+```text
+Queue Empty
      ↓
    wait()
      ↓
-Thread WAITING
+Thread → WAITING
      ↓
-CPU release
+CPU released
      ↓
-Producer data দেয়
+Producer adds data
      ↓
 notify()
      ↓
-Thread wake up
+Thread wakes up
      ↓
-condition check
-
-এখানে thread continuously CPU ব্যবহার করে condition check করছে না।
-
-Busy Waiting vs wait()
-Busy Waiting	wait()
-বারবার condition check করে	অপেক্ষা করে
-CPU ব্যবহার করে	CPU ব্যবহার করে না
-while loop continuously চলে	Thread WAITING state-এ যায়
-CPU waste হতে পারে	CPU efficient
-Simple কিন্তু inefficient	Better coordination
-মনে রাখার সহজ উদাহরণ
-
-Busy Waiting:
-
-দরজার সামনে দাঁড়িয়ে প্রতি ১ সেকেন্ডে বলছি—"দরজা খুলেছে?" 😄
-
-wait():
-
-দরজার সামনে বসে আছি; দরজা খুললে আমাকে ডাকতে বলেছি।
-
-Busy Waiting
-Thread → check → check → check → check → check
-              CPU ব্যবহার হচ্ছে
-
-
-wait()
-Thread → WAITING
-              ↓
-         notify()
-              ↓
-          wake up
-⭐ GitHub Note
-
-Busy Waiting: A thread continuously checks a condition in a loop while waiting for an event, consuming CPU unnecessarily. wait() is preferred when appropriate because the thread enters WAITING state and releases the CPU until it is notified.**
+Condition check
+     ↓
+Consume data
 ```
+
+`wait()` করার পর thread **WAITING state**-এ চলে যায় এবং CPU continuously consume করে না।
+
+---
+
+## Busy Waiting vs `wait()`
+
+| Busy Waiting                       | `wait()`                           |
+| ---------------------------------- | ---------------------------------- |
+| বারবার condition check করে         | Waiting state-এ থাকে               |
+| CPU continuously ব্যবহার করতে পারে | Waiting অবস্থায় CPU ব্যবহার করে না |
+| Continuous `while` loop            | `wait()` দিয়ে অপেক্ষা করে          |
+| CPU waste হতে পারে                 | More CPU efficient                 |
+| Long waiting-এর জন্য inefficient   | Thread coordination-এর জন্য better |
+
+---
+
+## Easy Real-Life Example
+
+### Busy Waiting
+
+দরজার সামনে দাঁড়িয়ে প্রতি মুহূর্তে জিজ্ঞেস করছি:
+
+> "দরজা খুলেছে?"
+> "দরজা খুলেছে?"
+> "দরজা খুলেছে?"
+> "দরজা খুলেছে?"
+
+অর্থাৎ **বারবার check করা**।
+
+### `wait()`
+
+দরজার সামনে বসে আছি এবং বললাম:
+
+> "দরজা খুললে আমাকে ডাকবে।"
+
+তারপর অপেক্ষা করছি।
+
+দরজা খুললে আমাকে notify করা হবে।
+
+---
+
+## Key Concept
+
+```text
+Busy Waiting
+
+Thread
+  ↓
+Check condition
+  ↓
+False
+  ↓
+Check again
+  ↓
+Check again
+  ↓
+Check again
+  ↓
+CPU usage continues
+```
+
+```text
+wait()
+
+Thread
+  ↓
+wait()
+  ↓
+WAITING state
+  ↓
+CPU released
+  ↓
+notify()
+  ↓
+Wake up
+  ↓
+Check condition
+```
+
+### ⭐ Remember
+
+> **Busy Waiting = Continuously checking a condition while consuming CPU.**
+
+> **`wait()` = Stop checking and enter WAITING state until notified.**
+
+`wait()` ব্যবহার করার সময় সাধারণত condition check করার জন্য **`while`** ব্যবহার করা উচিত, কারণ thread wake up হওয়ার পর condition আবার verify করতে হয়।
