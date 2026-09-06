@@ -206,3 +206,110 @@ Check condition
 `wait()` ব্যবহার করার সময় সাধারণত condition check করার জন্য **`while`** ব্যবহার করা উচিত, কারণ thread wake up হওয়ার পর condition আবার verify করতে হয়।
 <img width="1031" height="699" alt="image" src="https://github.com/user-attachments/assets/a97f73aa-87a8-4a0f-9c77-bd0fa840c678" />
 
+### my code for traditional producer and consumer example
+```
+import jdk.jfr.StackTrace;
+
+import javax.swing.*;
+import java.math.BigInteger;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.concurrent.Callable;
+
+class ShareQueue{
+    private final int CAPACITY=10;
+    private final Queue<String>queue = new LinkedList<>();
+    public synchronized void produce(String task)
+    {
+        if (queue.size()==CAPACITY)
+        {
+            try {
+               this.wait();
+
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+
+        }
+        queue.add(task);
+
+        this.notifyAll();
+    }
+    public synchronized String consumer()
+    {
+        if (queue.isEmpty())
+        {
+            try {
+               this.wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        String task = queue.poll();
+        this.notifyAll();
+        return task;
+
+    }
+
+}
+public class Main {
+
+    public  static  void main(String[] args) throws InterruptedException {
+        ShareQueue task = new ShareQueue();
+        for(int i =0;i<5;i++)
+        {
+            new Thread(()->{
+                taskProducer(task);
+            }).start();
+        }
+        for(int i =0;i<5;i++)
+        {
+            new Thread(()->{
+                taskConsumer(task);
+            }).start();
+        }
+
+
+
+    }
+static void taskProducer(ShareQueue shareQueue)
+{
+
+    int i=0;
+    while (true)
+    {
+        i++;
+        String temtask = "task "+i;
+        System.out.println("PRODUCER : "+Thread.currentThread().getName()+": by task="+temtask);
+        shareQueue.produce(temtask);
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+    static void taskConsumer(ShareQueue shareQueue)
+    {
+
+        int i=0;
+        while (true)
+        {
+            i++;
+            String temtask = "task "+i;
+            System.out.println("consumer  : "+Thread.currentThread().getName()+": by task="+temtask);
+            shareQueue.consumer();
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+}
+```
+
