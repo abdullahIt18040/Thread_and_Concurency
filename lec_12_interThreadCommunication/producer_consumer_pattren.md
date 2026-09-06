@@ -204,3 +204,5 @@ Check condition
 > **`wait()` = Stop checking and enter WAITING state until notified.**
 
 `wait()` ব্যবহার করার সময় সাধারণত condition check করার জন্য **`while`** ব্যবহার করা উচিত, কারণ thread wake up হওয়ার পর condition আবার verify করতে হয়।
+<img width="1031" height="699" alt="image" src="https://github.com/user-attachments/assets/a97f73aa-87a8-4a0f-9c77-bd0fa840c678" />
+
