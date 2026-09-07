@@ -312,4 +312,250 @@ static void taskProducer(ShareQueue shareQueue)
 
 }
 ```
+# Spurious Wakeup
+
+## What is Spurious Wakeup?
+
+**Spurious Wakeup** হলো এমন একটি situation যেখানে `wait()` করা একটি thread **`notify()` / `notifyAll()` না হলেও** wake up করতে পারে।
+
+অর্থাৎ:
+
+```text
+Thread
+   ↓
+ wait()
+   ↓
+WAITING
+   ↓
+Spurious Wakeup
+   ↓
+Thread wakes up
+   ↓
+Condition এখনো FALSE ❌
+```
+
+তাই `wait()` থেকে ফিরে আসার পর **condition আবার check করা বাধ্যতামূলক**।
+
+---
+
+# ❌ Wrong Approach: `if`
+
+```java
+synchronized (queue) {
+
+    if (queue.isEmpty()) {
+        queue.wait();
+    }
+
+    String task = queue.remove();
+}
+```
+
+সমস্যা:
+
+```text
+queue.empty = true
+      ↓
+Consumer → wait()
+      ↓
+Spurious Wakeup
+      ↓
+Consumer wakes up
+      ↓
+queue এখনো empty ❌
+      ↓
+queue.remove()
+      ↓
+Exception ❌
+```
+
+`if` condition শুধুমাত্র **একবার** check করে।
+
+---
+
+# ✅ Correct Approach: `while`
+
+```java
+synchronized (queue) {
+
+    while (queue.isEmpty()) {
+        queue.wait();
+    }
+
+    String task = queue.remove();
+}
+```
+
+এখন flow:
+
+```text
+Consumer
+   ↓
+queue empty?
+   ↓
+ YES
+   ↓
+ wait()
+   ↓
+Wake up
+   ↓
+queue empty?
+   ↓
+ YES → আবার wait()
+   ↓
+Producer adds task
+   ↓
+notify()
+   ↓
+Consumer wakes
+   ↓
+queue empty?
+   ↓
+ NO
+   ↓
+remove task ✅
+```
+
+---
+
+# Why `while`?
+
+`wait()` থেকে ফিরে আসার **প্রতিবার condition পুনরায় verify করতে হবে**।
+
+এটি শুধু **Spurious Wakeup**-এর জন্য নয়।
+
+অন্য কোনো thread condition পরিবর্তন করে ফেললেও `while` condition পুনরায় check করে।
+
+তাই Java concurrency-তে সাধারণ rule:
+
+```java
+while (conditionIsNotSatisfied) {
+    wait();
+}
+```
+
+---
+
+# Producer-Consumer Example
+
+```java
+class SharedQueue {
+
+    private final Queue<String> queue = new LinkedList<>();
+    private final int CAPACITY = 10;
+
+    public synchronized void produce(String task)
+            throws InterruptedException {
+
+        while (queue.size() == CAPACITY) {
+            wait();
+        }
+
+        queue.add(task);
+
+        notifyAll();
+    }
+
+    public synchronized String consume()
+            throws InterruptedException {
+
+        while (queue.isEmpty()) {
+            wait();
+        }
+
+        String task = queue.remove();
+
+        notifyAll();
+
+        return task;
+    }
+}
+```
+
+---
+
+## Producer
+
+```java
+while (queue.size() == CAPACITY) {
+    wait();
+}
+```
+
+মানে:
+
+> Queue full হলে অপেক্ষা করো। Wake up হওয়ার পর আবার check করো queue এখনো full কিনা।
+
+```text
+Queue Full
+    ↓
+  wait()
+    ↓
+ Wake up
+    ↓
+Check again
+    ↓
+Still Full? → wait()
+    ↓
+Not Full? → Produce ✅
+```
+
+---
+
+## Consumer
+
+```java
+while (queue.isEmpty()) {
+    wait();
+}
+```
+
+মানে:
+
+> Queue empty হলে অপেক্ষা করো। Wake up হওয়ার পর আবার check করো task এসেছে কিনা।
+
+```text
+Queue Empty
+    ↓
+  wait()
+    ↓
+ Wake up
+    ↓
+Check again
+    ↓
+Still Empty? → wait()
+    ↓
+Has Task? → Consume ✅
+```
+
+---
+
+# `if` vs `while`
+
+| `if`                               | `while`                        |
+| ---------------------------------- | ------------------------------ |
+| Condition একবার check করে          | Condition বারবার check করে     |
+| Spurious wakeup-এর ক্ষেত্রে unsafe | Spurious wakeup handle করে     |
+| Wake up → directly continue        | Wake up → condition আবার check |
+| ❌ Not recommended                  | ✅ Recommended                  |
+
+---
+
+## ⭐ Golden Rule
+
+```text
+wait() → always use inside while
+```
+
+### Remember
+
+> **Never assume that waking up means the condition is true.**
+
+```java
+while (conditionIsFalse) {
+    wait();
+}
+```
+
+**Spurious Wakeup → Wake up → Re-check condition → If still false → wait again.**
 
