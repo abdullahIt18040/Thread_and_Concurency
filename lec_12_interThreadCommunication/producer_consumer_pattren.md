@@ -343,7 +343,7 @@ Condition এখনো FALSE ❌
 synchronized (queue) {
 
     if (queue.isEmpty()) {
-        queue.wait(); //suddenly somehow thread come waiting stage to runable stage . to handle this 
+        queue.wait(); //suddenly somehow thread come waiting stage to runable stage . to handle this uisng while loop .
 
     }
 
