@@ -560,4 +560,59 @@ while (conditionIsFalse) {
 ```
 
 **Spurious Wakeup → Wake up → Re-check condition → If still false → wait again.**
+```
+RAM
+│
+├── Heap
+│     ├── Objects
+│     └── Static variables / class data
+│
+└── Thread Stack
+      └── Local variables / method frames
 
+
+CPU Core
+│
+├── Registers
+├── L1 Cache
+├── L2 Cache
+└── Executes instructions
+
+আর conceptually:
+
+Variable → Data কোথায় থাকবে
+Static Variable → Class-এর সাথে associated, সব object/thread share করতে পারে
+Instance Variable → Object-এর সাথে associated
+Local Variable → Thread-এর Stack Frame-এর সাথে associated
+
+Thread → কে কাজ করবে
+Core → কোথায় instruction execute হবে
+RAM → Data/instructions-এর মূল working memory
+সহজ Example
+class Counter {
+
+    static int count = 0;  // shared
+    int id;                // object-specific
+
+    void test() {
+        int x = 10;        // local
+    }
+}
+
+Memory concept:
+
+RAM
+│
+├── Heap
+│     ├── Static: count = 0
+│     │
+│     ├── Object c1
+│     │      └── id
+│     │
+│     └── Object c2
+│            └── id
+│
+└── Thread Stack
+      └── test()
+            └── x = 10
+```
