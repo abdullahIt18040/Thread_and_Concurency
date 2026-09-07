@@ -316,8 +316,7 @@ static void taskProducer(ShareQueue shareQueue)
 
 ## What is Spurious Wakeup?
 
-**Spurious Wakeup** হলো এমন একটি situation যেখানে `wait()` করা একটি thread **`notify()` / `notifyAll()` না হলেও** wake up করতে পারে।
-
+**Spurious Wakeup** হলো এমন একটি situation যেখানে `wait()` করা একটি thread **`notify()` / `notifyAll()` না হলেও** wake up করতে পারে। 
 অর্থাৎ:
 
 ```text
@@ -325,7 +324,7 @@ Thread
    ↓
  wait()
    ↓
-WAITING
+WAITING 
    ↓
 Spurious Wakeup
    ↓
@@ -344,7 +343,8 @@ Condition এখনো FALSE ❌
 synchronized (queue) {
 
     if (queue.isEmpty()) {
-        queue.wait();
+        queue.wait(); //suddenly somehow thread come waiting stage to runable stage . to handle this 
+
     }
 
     String task = queue.remove();
