@@ -819,7 +819,7 @@ while(true)
    ↓
 চলতেই থাকে ❌
 
-volatile দিলে:
+volatile দিলে: ram e variable er value change kore and  other thread ke bole wokring  this variable from ram not cache in core 
 
 Thread-2
    ↓
