@@ -615,4 +615,271 @@ RAM
 └── Thread Stack
       └── test()
             └── x = 10
+
+         RAM
+        ┌─────────────────────────┐
+        │      Method Area        │
+        │                         │
+        │  Class metadata         │
+        │  Method information     │
+        │  Static variables       │
+        │  Constant pool          │
+        │                         │
+        ├─────────────────────────┤
+        │         Heap            │
+        │                         │
+        │  Person object          │ ← p reference এখানে object-কে point করে
+        │                         │
+        ├─────────────────────────┤
+        │         Stack           │
+        │                         │
+        │  x = 10                 │
+        │  p = reference          │
+        │                         │
+        └─────────────────────────┘
+সহজভাবে মনে রাখো
+Method Area → Class-related information
+Heap        → Objects
+Stack       → Thread-এর local variables + method frames
+
+উদাহরণ:
+
+class Person {
+    static int count = 0;  // Static → class-related area
+
+    String name;           // Object → Heap
+
+    void test() {
+        int x = 10;        // Local → Stack
+    }
+}
+
+Conceptually:
+
+Method Area
+ └── Person class
+      ├── class metadata
+      ├── method information
+      └── static count
+
+Heap
+ └── Person object
+      └── name
+
+Stack
+ └── test() stack frame
+      └── x = 10
+
+─────────┘
+
+CPU core RAM থেকে data directly প্রতিটি operation-এ নেয় না; বাস্তবে CPU cache/register ব্যবহার করে:
+
+RAM
+ ↓
+L3 Cache
+ ↓
+L2 Cache
+ ↓
+L1 Cache
+ ↓
+CPU Registers
+ ↓
+CPU Core executes
+3. Thread-এর সাথে সম্পর্ক
+
+ধরো তোমার CPU-তে:
+
+4 Cores
+8 Logical Processors
+
+এবং Java-তে:
+
+Thread t1 = new Thread(...);
+Thread t2 = new Thread(...);
+Thread t3 = new Thread(...);
+
+তাহলে:
+
+             JVM
+              │
+       ┌──────┼──────┐
+       ↓      ↓      ↓
+      T1     T2     T3
+      │       │      │
+   Stack   Stack   Stack
+      │       │      │
+      └───────┼───────┘
+              ↓
+             Heap
+
+প্রতিটি Java thread-এর নিজস্ব stack থাকে।
+
+কিন্তু একই JVM-এর threads সাধারণত heap share করে।
+```
+## PUrpose of volatile keyword
+<img width="1167" height="572" alt="image" src="https://github.com/user-attachments/assets/fa2a6c07-fc48-4d9e-89d0-031b795288f0" />
+
+### volatile কী?
+```
+ দুইটা thread একই variable ব্যবহার করছে।
+
+boolean running = true;
+
+এক thread বলছে:
+
+Thread-1 → running এর value check করছে
+
+অন্য thread বলছে:
+
+Thread-2 → running = false করছে
+
+এখন প্রশ্ন হলো:
+
+Thread-1 কি Thread-2-এর পরিবর্তন করা false value দেখতে পাবে?
+
+এখানেই volatile কাজে আসে।
+
+সহজ Example
+class MyTask {
+
+    volatile boolean running = true;
+
+    void start() {
+
+        while (running) {
+            System.out.println("Working...");
+        }
+
+        System.out.println("Stopped");
+    }
+
+    void stop() {
+        running = false;
+    }
+}
+
+ধরো:
+
+MyTask task = new MyTask();
+
+Thread t1 = new Thread(task::start);
+Thread t2 = new Thread(task::stop);
+
+t1.start();
+Thread.sleep(1000);
+t2.start();
+
+এখানে:
+
+Thread-1
+   ↓
+while(running)
+   ↓
+running = true
+   ↓
+Working...
+Working...
+Working...
+
+
+Thread-2
+   ↓
+running = false
+   ↓
+Thread-1 sees false
+   ↓
+Loop stops ✅
+volatile কী করছে?
+volatile boolean running = true;
+
+এটি বলে:
+
+"এই variable shared, তাই এক thread-এর update অন্য thread যেন দেখতে পারে।"
+
+volatile ছাড়া কী সমস্যা?
+boolean running = true;
+
+Thread-1 হয়তো running-এর value নিজের CPU cache/register-এ ধরে রাখতে পারে এবং Thread-2 running = false করার পরেও Thread-1-এর loop-এর জন্য updated value visible হওয়ার guarantee থাকে না।
+
+Conceptually:
+
+RAM
+
+running = false
+     ↑
+     │
+Thread-2 লিখেছে
+
+
+Thread-1
+   ↓
+পুরোনো value true দেখতে পারে
+   ↓
+while(true)
+   ↓
+চলতেই থাকে ❌
+
+volatile দিলে:
+
+Thread-2
+   ↓
+running = false
+   ↓
+shared visibility
+   ↓
+Thread-1
+   ↓
+false দেখতে পারে
+   ↓
+loop stops ✅
+সবচেয়ে গুরুত্বপূর্ণ বিষয়
+
+volatile শুধু visibility-এর সমস্যা solve করে।
+
+এটা:
+
+volatile int count = 0;
+
+count++;
+
+কে thread-safe করে না।
+
+কারণ:
+
+count++
+
+= read
++ 1
++ write
+
+দুই thread একসাথে করলে সমস্যা হতে পারে।
+
+Thread-1 → read 0
+Thread-2 → read 0
+
+Thread-1 → write 1
+Thread-2 → write 1
+
+Final = 1 ❌
+
+এক্ষেত্রে AtomicInteger ব্যবহার করা ভালো:
+
+AtomicInteger count = new AtomicInteger(0);
+
+count.incrementAndGet();
+🧠 খুব সহজে মনে রাখো
+volatile
+   ↓
+Visibility
+   ↓
+এক thread-এর পরিবর্তন
+অন্য thread দেখতে পারবে
+
+আর:
+
+volatile ❌ → Atomicity দেয় না
+volatile ❌ → count++ safe করে না
+Interview-এর জন্য এক লাইন
+
+volatile ensures visibility of a shared variable across threads, but it does not provide atomicity.
 ```
