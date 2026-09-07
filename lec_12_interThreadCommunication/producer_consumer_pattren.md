@@ -883,3 +883,178 @@ Interview-এর জন্য এক লাইন
 
 volatile ensures visibility of a shared variable across threads, but it does not provide atomicity.
 ```
+# Java — `volatile` vs `synchronized`
+
+## 1. `volatile`
+
+`volatile` একটি **variable/field-এর modifier**।
+
+এর প্রধান কাজ হলো **Visibility** নিশ্চিত করা।
+
+এক thread কোনো shared variable-এর value পরিবর্তন করলে অন্য thread সেই updated value দেখতে পারে।
+
+```java
+class Task {
+    private volatile boolean running = true;
+
+    public void start() {
+        while (running) {
+            System.out.println("Working...");
+        }
+    }
+
+    public void stop() {
+        running = false;
+    }
+}
+```
+
+### সহজভাবে
+
+```text
+volatile
+   ↓
+Shared Variable
+   ↓
+Visibility
+```
+
+### গুরুত্বপূর্ণ
+
+`volatile` **atomicity দেয় না**।
+
+```java
+volatile int count = 0;
+
+count++; // Thread-safe নয়
+```
+
+কারণ:
+
+```text
+count++
+   ↓
+Read
+   ↓
+Add 1
+   ↓
+Write
+```
+
+এখানে একাধিক thread একসাথে কাজ করলে সমস্যা হতে পারে।
+
+---
+
+# 2. `synchronized`
+
+`synchronized` **method অথবা block**-এ ব্যবহার করা হয়।
+
+এর প্রধান কাজ:
+
+* Mutual Exclusion
+* Atomicity
+* Visibility
+
+অর্থাৎ একই সময়ে একটি thread critical section-এ কাজ করতে পারে।
+
+```java
+class Counter {
+
+    private int count = 0;
+
+    public synchronized void increment() {
+        count++;
+    }
+}
+```
+
+এখানে একসাথে দুইটি thread `increment()` execute করতে পারবে না।
+
+```text
+synchronized
+      ↓
+Method / Block
+      ↓
+Lock
+      ↓
+Mutual Exclusion
+      ↓
+Atomicity + Visibility
+```
+
+---
+
+# 3. `volatile` vs `synchronized`
+
+| `volatile`                       | `synchronized`                |
+| -------------------------------- | ----------------------------- |
+| Variable/field-এর জন্য           | Method বা block-এর জন্য       |
+| Visibility                       | Visibility + Atomicity        |
+| Lock নেয় না                      | Lock/monitor ব্যবহার করে      |
+| `count++` safe নয়                | Critical section safe করা যায় |
+| Lightweight visibility mechanism | Mutual exclusion দেয়          |
+
+---
+
+## Easy Rule
+
+```text
+volatile
+→ Variable
+→ Visibility
+
+synchronized
+→ Method/Block
+→ Lock
+→ Mutual Exclusion
+→ Atomicity + Visibility
+```
+
+### Example
+
+```java
+volatile boolean running = true;
+```
+
+এখানে দরকার **visibility**।
+
+আর:
+
+```java
+public synchronized void increment() {
+    count++;
+}
+```
+
+এখানে দরকার **atomic operation + mutual exclusion**।
+
+---
+
+## `static` আলাদা Concept
+
+`static`, `volatile`, এবং `synchronized` একে অপরের replacement নয়।
+
+```text
+static       → Class-level
+volatile     → Visibility
+synchronized → Lock / Mutual Exclusion
+```
+
+তাই এটাও valid:
+
+```java
+static volatile boolean running = true;
+```
+
+এখানে:
+
+* `static` → class-level variable
+* `volatile` → visibility
+* `boolean` → variable type
+
+---
+
+## Interview One-Liner
+
+> **`volatile` provides visibility of shared variables, while `synchronized` provides mutual exclusion, atomicity, and visibility.**
+
