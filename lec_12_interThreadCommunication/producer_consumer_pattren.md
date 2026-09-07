@@ -1,3 +1,5 @@
+<img width="783" height="405" alt="image" src="https://github.com/user-attachments/assets/905ae4cc-430d-4bf9-ae47-0c25208d95e9" />
+
 ### Traditional Producer-Consumer Pattern .
 
 <img width="1083" height="583" alt="image" src="https://github.com/user-attachments/assets/d82a7ed6-c942-4c17-9a58-201ba890d036" />
@@ -314,7 +316,7 @@ static void taskProducer(ShareQueue shareQueue)
 ```
 # Spurious Wakeup
 
-## What is Spurious Wakeup?
+## What is Spurious Wakeup and how to handle this ?
 
 **Spurious Wakeup** হলো এমন একটি situation যেখানে `wait()` করা একটি thread **`notify()` / `notifyAll()` না হলেও** wake up করতে পারে। 
 অর্থাৎ:
