@@ -922,9 +922,11 @@ unlock → count = 0
 Multiple acquire
     ↓
 Multiple release
+ after relase other thead can acquire lock. 
 ```
 
 আর **অন্য thread একই সময়ে সেই lock acquire করতে পারে না**; তাকে অপেক্ষা করতে হয়।
 <img width="746" height="275" alt="image" src="https://github.com/user-attachments/assets/2b91302e-79ab-459b-a270-f3e769aa143f" />
+<img width="1314" height="822" alt="image" src="https://github.com/user-attachments/assets/95c6990d-5902-4121-a22b-f6aa47534ddd" />
 
 
