@@ -1232,6 +1232,10 @@ CAS (Compare-And-Swap) ব্যবহার করতে পারে
 ### One Line Definition
 
 > **Atomic operation হলো এমন operation যা concurrency-এর মধ্যে একটি single, indivisible action হিসেবে সম্পন্ন হয়।**
+## my code is 
+<img width="1269" height="632" alt="image" src="https://github.com/user-attachments/assets/39bd421a-98c7-40c9-9e62-c140f0f1e0ec" />
+<img width="1386" height="683" alt="image" src="https://github.com/user-attachments/assets/d5a6fff5-b42d-4f07-8ae9-90b460b6b194" />
+
 
 
 
