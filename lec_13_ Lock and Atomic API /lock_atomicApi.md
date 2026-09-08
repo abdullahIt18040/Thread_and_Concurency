@@ -1,4 +1,4 @@
-# Java Lock API — বাংলা নোট
+# Java Lock API — NOTE 
 
 ## 1. `Lock` কী?
 
