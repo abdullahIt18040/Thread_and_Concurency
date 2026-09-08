@@ -1,3 +1,6 @@
+
+<img width="757" height="449" alt="image" src="https://github.com/user-attachments/assets/dc08b9a2-c4ce-4b45-b0c3-782c59837970" />
+
 # Java Lock API — NOTE 
 
 ## 1. `Lock` কী?
