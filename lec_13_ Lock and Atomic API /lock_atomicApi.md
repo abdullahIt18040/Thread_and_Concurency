@@ -694,4 +694,237 @@ Multiple reader + exclusive writer
 ### মূল কথা
 
 > **`synchronized` সহজ, কিন্তু `Lock` বেশি flexible। `Lock` ব্যবহার করলে lock management-এর দায়িত্ব developer-এর, তাই `try-finally` ব্যবহার করে `unlock()` করা গুরুত্বপূর্ণ।**
+# Java Reentrant Lock — সহজ বাংলা নোট
+
+## 1. একটি Object-এর Lock
+
+Java-তে প্রতিটি object-এর সাথে একটি **Intrinsic Monitor Lock** থাকে।
+
+```text
+Object
+  │
+  └── Monitor Lock
+```
+
+একই সময়ে **একাধিক thread এই lock acquire করতে পারে না**।
+
+```text
+Thread-1 → Lock পেল → কাজ করছে
+
+Thread-2 → Lock পাওয়ার জন্য অপেক্ষা করছে
+```
+
+---
+
+## 2. Reentrant কী?
+
+একটি গুরুত্বপূর্ণ বিষয় হলো:
+
+> **একই thread একই lock একাধিকবার acquire করতে পারে।**
+
+এটাকেই বলা হয় **Reentrant**।
+
+উদাহরণ:
+
+```java
+synchronized void methodA() {
+    methodB();
+}
+
+synchronized void methodB() {
+    // কাজ
+}
+```
+
+যদি `Thread-1` `methodA()`-তে ঢোকে:
+
+```text
+Thread-1
+   ↓
+Lock acquire
+count = 1
+   ↓
+methodA()
+   ↓
+methodB()
+   ↓
+আবার একই Lock acquire
+count = 2
+```
+
+এখানে দ্বিতীয়বার lock নেওয়ার সময় thread আটকে যায় না, কারণ **lock-এর owner একই Thread-1**।
+
+---
+
+## 3. Lock কখন Free হবে?
+
+`methodB()` শেষ হলে:
+
+```text
+count = 2
+   ↓
+unlock
+   ↓
+count = 1
+```
+
+তারপর `methodA()` শেষ হলে:
+
+```text
+count = 1
+   ↓
+unlock
+   ↓
+count = 0
+```
+
+এখন lock পুরোপুরি free।
+
+```text
+count = 0
+    ↓
+Lock available
+```
+
+---
+
+## 4. সহজ Example
+
+```text
+Thread-1
+   │
+   ├── Lock acquire → count = 1
+   │
+   ├── methodA()
+   │      │
+   │      └── methodB()
+   │              │
+   │              └── Lock acquire → count = 2
+   │
+   ├── methodB() শেষ → count = 1
+   │
+   └── methodA() শেষ → count = 0
+```
+
+---
+
+# 5. `ReentrantLock`-এও একই Concept
+
+`ReentrantLock`-এর ক্ষেত্রেও একই thread একই lock বারবার acquire করতে পারে।
+
+```java
+ReentrantLock lock = new ReentrantLock();
+
+lock.lock();    // count = 1
+
+lock.lock();    // count = 2
+
+lock.unlock();  // count = 1
+
+lock.unlock();  // count = 0
+```
+
+এখানে:
+
+```text
+lock.lock()   → count + 1
+lock.unlock() → count - 1
+```
+
+---
+
+# 6. সবচেয়ে গুরুত্বপূর্ণ Rule
+
+> **যতবার `lock()` করবেন, ততবার `unlock()` করতে হবে।**
+
+```text
+lock()       → 1
+lock()       → 2
+unlock()     → 1
+unlock()     → 0
+```
+
+একটি `lock()` করলে একটি `unlock()` প্রয়োজন।
+
+---
+
+# 7. অন্য Thread কী করবে?
+
+ধরুন:
+
+```text
+Thread-1 → Lock acquire
+```
+
+এখন:
+
+```text
+Thread-2 → একই Lock acquire করতে চায়
+```
+
+Thread-2 lock পাবে না।
+
+```text
+Thread-1
+   ↓
+Lock acquired
+   ↓
+Working...
+
+Thread-2
+   ↓
+Lock চাই
+   ↓
+Waiting...
+```
+
+Thread-1 lock release করার পর Thread-2 lock পেতে পারে।
+
+---
+
+# 8. মূল বিষয় এক নজরে
+
+```text
+একটি Object
+     │
+     └── একটি Monitor Lock
+              │
+              ├── Thread-1 → acquire
+              │
+              └── অন্য Thread → wait
+```
+
+কিন্তু একই thread:
+
+```text
+Thread-1
+   ↓
+Lock acquire → count = 1
+   ↓
+আবার acquire → count = 2
+   ↓
+unlock → count = 1
+   ↓
+unlock → count = 0
+```
+
+### মনে রাখুন
+
+> **Lock একটি, কিন্তু একই owning thread সেটিকে multiple times acquire করতে পারে।**
+
+এটাই **Reentrant Locking**।
+
+```text
+একই Thread
+    ↓
+একই Lock
+    ↓
+Multiple acquire
+    ↓
+Multiple release
+```
+
+আর **অন্য thread একই সময়ে সেই lock acquire করতে পারে না**; তাকে অপেক্ষা করতে হয়।
+<img width="746" height="275" alt="image" src="https://github.com/user-attachments/assets/2b91302e-79ab-459b-a270-f3e769aa143f" />
+
 
