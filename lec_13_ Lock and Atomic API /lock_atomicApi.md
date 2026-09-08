@@ -2,6 +2,8 @@
 <img width="757" height="449" alt="image" src="https://github.com/user-attachments/assets/dc08b9a2-c4ce-4b45-b0c3-782c59837970" />
 
 # Java Lock API — NOTE 
+Lock API হলো Java-র এমন একটি concurrency mechanism যার মাধ্যমে আমরা একাধিক Thread-এর shared resource access-কে নিয়ন্ত্রণ করতে পারি এবং synchronized-এর চেয়ে বেশি flexible control পাই।
+
 
 ## 1. `Lock` কী?
 
@@ -931,5 +933,306 @@ Multiple release
 আর **অন্য thread একই সময়ে সেই lock acquire করতে পারে না**; তাকে অপেক্ষা করতে হয়।
 <img width="746" height="275" alt="image" src="https://github.com/user-attachments/assets/2b91302e-79ab-459b-a270-f3e769aa143f" />
 <img width="1314" height="822" alt="image" src="https://github.com/user-attachments/assets/95c6990d-5902-4121-a22b-f6aa47534ddd" />
+
+## Fair lock
+```
+৯. Fair Lock
+
+তুমি চাইলে:
+
+Lock lock = new ReentrantLock(true);
+
+এখানে true মানে fairness।
+
+ধরো:
+
+Thread A → অপেক্ষা করছে
+Thread B → অপেক্ষা করছে
+Thread C → অপেক্ষা করছে
+
+Fair lock সাধারণত waiting order অনুসরণ করার চেষ্টা করে:
+
+A → B → C
+
+অর্থাৎ যে আগে অপেক্ষা করছে, তাকে আগে সুযোগ দেওয়ার চেষ্টা করা হয়।
+```
+# Atomic Operation — Java Concurrency
+
+## 🔹 What is Atomic Operation?
+
+**Atomic operation** হলো এমন একটি operation যা **একটি single, indivisible step** হিসেবে সম্পন্ন হয়।
+
+অর্থাৎ operation-এর মাঝখানে অন্য কোনো thread এসে এটাকে ভেঙে দিতে পারে না।
+
+> **Atomic = পুরো operation একসাথে সম্পন্ন হবে, মাঝখানে partial state থাকবে না।**
+
+---
+
+## 🔴 `count++` কেন Atomic নয়?
+
+```java
+count++;
+```
+
+দেখতে একটি operation মনে হলেও internally এটি প্রায়:
+
+```text
+READ → MODIFY → WRITE
+```
+
+অর্থাৎ:
+
+```text
+count++
+   ↓
+Read count
+   ↓
+Add 1
+   ↓
+Write count
+```
+
+তাই `count++` **atomic নয়**।
+
+### Race Condition Example
+
+ধরি:
+
+```text
+count = 0
+```
+
+দুইটি thread একই সময়ে কাজ করলে:
+
+```text
+Thread A              Thread B
+   │                     │
+   │ Read = 0            │
+   │                     │ Read = 0
+   │                     │
+   │ 0 + 1 = 1           │ 0 + 1 = 1
+   │                     │
+   │ Write = 1           │ Write = 1
+```
+
+Final result:
+
+```text
+count = 1
+```
+
+কিন্তু expected:
+
+```text
+count = 2
+```
+
+এটাই **Race Condition**।
+
+---
+
+# 🟢 AtomicInteger
+
+Java-তে atomic operation করার জন্য:
+
+```java
+AtomicInteger count = new AtomicInteger(0);
+```
+
+তারপর:
+
+```java
+count.incrementAndGet();
+```
+
+ব্যবহার করা যায়।
+
+### Example
+
+```java
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class Main {
+
+    static AtomicInteger count = new AtomicInteger(0);
+
+    static void increment() {
+        for (int i = 0; i < 300; i++) {
+            count.incrementAndGet();
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+
+        Thread t1 = new Thread(Main::increment);
+        Thread t2 = new Thread(Main::increment);
+        Thread t3 = new Thread(Main::increment);
+
+        t1.start();
+        t2.start();
+        t3.start();
+
+        t1.join();
+        t2.join();
+        t3.join();
+
+        System.out.println(count.get());
+    }
+}
+```
+
+Output:
+
+```text
+900
+```
+
+কারণ:
+
+```text
+Thread 1 → 300
+Thread 2 → 300
+Thread 3 → 300
+
+Total → 900
+```
+
+---
+
+# 🔥 CAS — Compare And Swap
+
+`AtomicInteger` সাধারণত **CAS (Compare-And-Swap)** mechanism ব্যবহার করে।
+
+ধরি:
+
+```text
+count = 10
+```
+
+Thread A চায়:
+
+```text
+10 → 11
+```
+
+CAS ধারণাটি:
+
+```text
+Expected value = 10
+New value      = 11
+```
+
+CAS বলবে:
+
+```text
+যদি current value এখনও 10 থাকে
+        ↓
+তাহলে 11 করে দাও
+```
+
+কিন্তু অন্য thread যদি এর মধ্যে value পরিবর্তন করে:
+
+```text
+10 → 20
+```
+
+তাহলে:
+
+```text
+Expected = 10
+Actual   = 20
+
+CAS → FAIL
+```
+
+Thread আবার চেষ্টা করবে।
+
+---
+
+# 🔹 Common Atomic Operations
+
+```java
+AtomicInteger count = new AtomicInteger(0);
+
+count.get();
+
+count.set(10);
+
+count.incrementAndGet();
+
+count.decrementAndGet();
+
+count.getAndIncrement();
+
+count.getAndDecrement();
+
+count.addAndGet(10);
+
+count.compareAndSet(10, 20);
+```
+
+---
+
+# ⚠️ Important
+
+**Atomic operation ≠ পুরো code thread-safe**
+
+উদাহরণ:
+
+```java
+if (count.get() < 10) {
+    count.incrementAndGet();
+}
+```
+
+এখানে:
+
+```text
+get()
+ ↓
+condition check
+ ↓
+increment
+```
+
+প্রতিটি individual operation atomic হলেও **পুরো sequence atomic নয়**।
+
+একাধিক thread একই সময়ে condition pass করতে পারে।
+
+---
+
+# 🧠 Atomic vs Non-Atomic
+
+| Operation                         | Atomic? |
+| --------------------------------- | ------- |
+| `count++`                         | ❌ No    |
+| `count--`                         | ❌ No    |
+| `AtomicInteger.incrementAndGet()` | ✅ Yes   |
+| `AtomicInteger.decrementAndGet()` | ✅ Yes   |
+| `AtomicInteger.compareAndSet()`   | ✅ Yes   |
+
+---
+
+# 🎯 Key Points
+
+```text
+Atomic Operation
+      ↓
+Indivisible operation
+      ↓
+Concurrency-এর মধ্যে safe individual operation
+      ↓
+Race condition এড়াতে সাহায্য করে
+      ↓
+Java → AtomicInteger / AtomicLong / AtomicReference
+      ↓
+CAS (Compare-And-Swap) ব্যবহার করতে পারে
+```
+
+### One Line Definition
+
+> **Atomic operation হলো এমন operation যা concurrency-এর মধ্যে একটি single, indivisible action হিসেবে সম্পন্ন হয়।**
+
+
 
 
