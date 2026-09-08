@@ -1,4 +1,5 @@
 # ReentrantLock — Under the Hood
+### ReentrantLock — Under the Hood used AQS(AbstractQueuedSynchronizer) and CAS(Compare and swape)
 
 Java-এর `ReentrantLock` বুঝতে হলে মূলত ৩টি concept বুঝতে হবে:
 
